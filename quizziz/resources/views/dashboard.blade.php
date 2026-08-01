@@ -46,7 +46,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="deep-bg text-slate-100 font-sans min-h-screen pb-24" x-data="{ openCreate: false }">
+<body class="deep-bg text-slate-100 font-sans min-h-screen pb-24" x-data="{ openCreate: false, openAddQuestion: false, activeQuizId: null, activeQuizTitle: '' }">
     <!-- Navbar -->
     <nav class="sticky top-0 z-40 w-full glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -164,11 +164,11 @@
                                 </div>
 
                                 <!-- Actions panel -->
-                                <div class="px-6 pb-6 pt-3 border-t border-white/5 space-y-3 bg-white/5">
+                                <div class="px-6 pb-6 pt-3 border-t border-white/5 space-y-3 bg-white/5 text-left">
                                     @if($activeUser->role === 'teacher' && $quiz->creator_id === $activeUser->id)
                                         <!-- Add Question Form trigger -->
-                                        <button @click="activeQuizId = (activeQuizId === {{ $quiz->id }} ? null : {{ $quiz->id }})" class="w-full text-center py-2 border border-purple-500/30 hover:border-purple-500/60 hover:bg-purple-500/5 text-purple-400 text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all">
-                                            <span x-text="activeQuizId === {{ $quiz->id }} ? 'Tutup Form' : 'Tambah Pertanyaan'"></span>
+                                        <button @click="activeQuizId = {{ $quiz->id }}; activeQuizTitle = '{{ addslashes($quiz->title) }}'; openAddQuestion = true" class="w-full text-center py-3 border border-purple-500/30 hover:border-purple-500/60 hover:bg-purple-500/5 text-purple-400 text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all">
+                                            <span>Tambah Pertanyaan</span>
                                         </button>
                                         
                                         <!-- Launch Host Button -->
@@ -178,54 +178,12 @@
                                                 Launch Live Game (Host)
                                             </button>
                                         </form>
-                                    @else
-                                        <p class="text-[10px] text-slate-500 italic text-center py-2">Hanya host pembuat kuis yang dapat memulai game live ini.</p>
                                     @endif
-                                </div>
 
-                                <!-- Expandable Add Question Form -->
-                                <div x-show="activeQuizId === {{ $quiz->id }}" x-cloak class="absolute inset-0 bg-slate-950/95 z-20 p-5 overflow-y-auto rounded-2xl border border-pink-500/50">
-                                    <div class="flex items-center justify-between mb-4">
-                                        <h4 class="text-xs font-black text-pink-400 uppercase tracking-widest">Tambah Pertanyaan</h4>
-                                        <button @click="activeQuizId = null" class="text-slate-400 hover:text-slate-200 text-xs font-bold">X</button>
-                                    </div>
-                                    <form action="{{ route('quiz.question', $quiz->id) }}" method="POST" class="space-y-3 text-left">
-                                        @csrf
-                                        <div>
-                                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pertanyaan</label>
-                                            <input type="text" name="text" required placeholder="Contoh: Berapa hasil 5 + 5?" class="w-full bg-slate-900 px-3 py-2 border border-white/10 rounded-lg text-xs text-white">
-                                        </div>
-                                        <div class="space-y-2">
-                                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Pilihan Jawaban</label>
-                                            <input type="text" name="options[]" required placeholder="Pilihan A" class="w-full bg-slate-900 px-3 py-1.5 border border-white/10 rounded-lg text-xs text-white">
-                                            <input type="text" name="options[]" required placeholder="Pilihan B" class="w-full bg-slate-900 px-3 py-1.5 border border-white/10 rounded-lg text-xs text-white">
-                                            <input type="text" name="options[]" required placeholder="Pilihan C" class="w-full bg-slate-900 px-3 py-1.5 border border-white/10 rounded-lg text-xs text-white">
-                                            <input type="text" name="options[]" required placeholder="Pilihan D" class="w-full bg-slate-900 px-3 py-1.5 border border-white/10 rounded-lg text-xs text-white">
-                                        </div>
-                                        <div>
-                                            <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Jawaban Benar</label>
-                                            <select name="correct_answer" class="w-full bg-slate-900 px-3 py-2 border border-white/10 rounded-lg text-xs text-white">
-                                                <option value="0">Pilihan A</option>
-                                                <option value="1">Pilihan B</option>
-                                                <option value="2">Pilihan C</option>
-                                                <option value="3">Pilihan D</option>
-                                            </select>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Limit Waktu (detik)</label>
-                                                <input type="number" name="time_limit" value="30" min="5" max="120" class="w-full bg-slate-900 px-3 py-2 border border-white/10 rounded-lg text-xs text-white">
-                                            </div>
-                                            <div>
-                                                <label class="block text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-1">Poin Maksimal</label>
-                                                <input type="number" name="points" value="100" min="50" max="500" class="w-full bg-slate-900 px-3 py-2 border border-white/10 rounded-lg text-xs text-white">
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-2 pt-2">
-                                            <button type="button" @click="activeQuizId = null" class="w-1/2 py-2 border border-white/10 text-xs rounded-lg font-bold">Batal</button>
-                                            <button type="submit" class="w-1/2 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg text-xs font-bold">Simpan</button>
-                                        </div>
-                                    </form>
+                                    <!-- Solo Play Button -->
+                                    <a href="{{ route('quiz.solo', $quiz->id) }}" class="block w-full text-center bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/35 text-white font-extrabold py-3.5 rounded-xl text-[10px] uppercase tracking-widest transition-all transform active:scale-95">
+                                        Main Mandiri (Solo Play)
+                                    </a>
                                 </div>
                             </div>
                         @endforeach
@@ -301,6 +259,119 @@
                     <button type="submit" class="w-1/2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-purple-500/25">Simpan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal Tambah Pertanyaan / Import (Teacher) -->
+    <div x-show="openAddQuestion" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak x-data="{ tab: 'manual' }">
+        <div @click.away="openAddQuestion = false" class="glass rounded-3xl w-full max-w-2xl p-6 shadow-2xl transform transition-all text-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-5 border-b border-white/10 pb-4">
+                <div>
+                    <h3 class="text-lg font-black text-white uppercase tracking-wider">Kelola Soal Kuis</h3>
+                    <p class="text-[10px] text-pink-400 font-extrabold uppercase tracking-widest mt-1">Kuis: <span x-text="activeQuizTitle"></span></p>
+                </div>
+                <button @click="openAddQuestion = false" class="text-slate-400 hover:text-slate-200 font-bold text-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Tab Buttons -->
+            <div class="flex border-b border-white/5 mb-6">
+                <button @click="tab = 'manual'" :class="tab === 'manual' ? 'border-pink-500 text-pink-400' : 'border-transparent text-slate-400 hover:text-slate-200'" class="flex-1 py-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all">Tambah Manual</button>
+                <button @click="tab = 'import'" :class="tab === 'import' ? 'border-pink-500 text-pink-400' : 'border-transparent text-slate-400 hover:text-slate-200'" class="flex-1 py-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all">Import dari CSV</button>
+            </div>
+
+            <!-- Tab 1: Manual Form -->
+            <div x-show="tab === 'manual'">
+                <form :action="'/quiz/' + activeQuizId + '/question'" method="POST" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Pertanyaan</label>
+                        <input type="text" name="text" required placeholder="Contoh: Berapa hasil 15 x 3?" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-sm font-semibold text-white">
+                    </div>
+                    <div class="space-y-3">
+                        <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400">Pilihan Jawaban</label>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[8px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Pilihan A</label>
+                                <input type="text" name="options[]" required placeholder="Jawaban A" class="w-full bg-slate-900/60 px-4 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Pilihan B</label>
+                                <input type="text" name="options[]" required placeholder="Jawaban B" class="w-full bg-slate-900/60 px-4 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Pilihan C</label>
+                                <input type="text" name="options[]" required placeholder="Jawaban C" class="w-full bg-slate-900/60 px-4 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-extrabold uppercase tracking-wider text-slate-500 mb-1">Pilihan D</label>
+                                <input type="text" name="options[]" required placeholder="Jawaban D" class="w-full bg-slate-900/60 px-4 py-2.5 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Jawaban Benar</label>
+                            <select name="correct_answer" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                                <option value="0">Pilihan A</option>
+                                <option value="1">Pilihan B</option>
+                                <option value="2">Pilihan C</option>
+                                <option value="3">Pilihan D</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Limit Waktu (Detik)</label>
+                            <input type="number" name="time_limit" value="30" min="5" max="120" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Poin Maksimal</label>
+                            <input type="number" name="points" value="100" min="50" max="500" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-4 border-t border-white/5">
+                        <button type="button" @click="openAddQuestion = false" class="w-1/2 px-4 py-3 border border-white/10 hover:bg-white/5 rounded-xl font-bold text-sm transition-all">Batal</button>
+                        <button type="submit" class="w-1/2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-purple-500/25">Simpan Pertanyaan</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tab 2: Import CSV Form -->
+            <div x-show="tab === 'import'" class="space-y-4">
+                <div class="bg-purple-950/40 border border-purple-500/20 p-4 rounded-2xl text-xs space-y-2 leading-relaxed text-left">
+                    <p class="font-bold text-pink-400">💡 Petunjuk Format CSV:</p>
+                    <ul class="list-disc pl-4 space-y-1 text-slate-300">
+                        <li>File harus berekstensi <strong>.csv</strong></li>
+                        <li>Format kolom: <code>pertanyaan, opsi_a, opsi_b, opsi_c, opsi_d, jawaban_benar, limit_waktu, poin</code></li>
+                        <li>Kolom <code>jawaban_benar</code> diisi dengan huruf <strong>A, B, C, D</strong> atau angka <strong>0, 1, 2, 3</strong>.</li>
+                    </ul>
+                    <div class="pt-2">
+                        <a href="{{ route('quiz.template.csv') }}" class="inline-flex items-center gap-1.5 text-pink-400 hover:text-pink-300 font-extrabold underline">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                            <span>Unduh Template CSV Contoh</span>
+                        </a>
+                    </div>
+                </div>
+
+                <form :action="'/quiz/' + activeQuizId + '/import'" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Pilih File CSV</label>
+                        <div class="relative group border-2 border-dashed border-white/10 hover:border-pink-500/40 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-900/30">
+                            <input type="file" name="file" required accept=".csv" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer">
+                            <div class="space-y-2">
+                                <svg class="w-8 h-8 text-slate-400 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                <p class="text-xs font-bold text-slate-300">Pilih file CSV dari komputer Anda</p>
+                                <p class="text-[10px] text-slate-500">Maksimum ukuran file: 2MB (Format .csv)</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-3 pt-4 border-t border-white/5">
+                        <button type="button" @click="openAddQuestion = false" class="w-1/2 px-4 py-3 border border-white/10 hover:bg-white/5 rounded-xl font-bold text-sm transition-all">Batal</button>
+                        <button type="submit" class="w-1/2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-purple-500/25">Mulai Import</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </body>
