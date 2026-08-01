@@ -16,6 +16,7 @@ class Quiz extends Model
         'description',
         'creator_id',
         'banner_theme',
+        'code',
     ];
 
     public function creator(): BelongsTo
@@ -31,5 +32,10 @@ class Quiz extends Model
     public function gameSessions(): HasMany
     {
         return $this->hasMany(GameSession::class, 'quiz_id');
+    }
+
+    public function soloAttempts(): HasMany
+    {
+        return $this->hasMany(SoloAttempt::class, 'quiz_id');
     }
 }

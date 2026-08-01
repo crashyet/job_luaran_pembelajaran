@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasil Solo Play: {{ $quiz->title }} - Quizizz</title>
+    <title>Gabung Solo Play: {{ $quiz->title }} - Quizizz</title>
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -46,10 +46,10 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="deep-bg text-slate-100 font-sans min-h-screen pb-24">
+<body class="deep-bg text-slate-100 font-sans min-h-screen flex flex-col justify-between">
 
     <!-- Navbar -->
-    <nav class="sticky top-0 z-40 w-full glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
+    <nav class="w-full glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <a href="{{ route('dashboard') }}" class="text-slate-400 hover:text-white transition-colors p-2 rounded-xl hover:bg-white/5">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -58,54 +58,60 @@
             </a>
             <div class="h-6 w-px bg-white/10 mx-1"></div>
             <div>
-                <h1 class="text-base font-bold tracking-wider text-white line-clamp-1">{{ $quiz->title }}</h1>
-                <p class="text-[9px] text-pink-400 font-extrabold uppercase tracking-widest mt-0.5">Hasil Permainan Mandiri</p>
+                <h1 class="text-base font-bold tracking-wider text-white line-clamp-1">Quizizz Interactive</h1>
+                <p class="text-[9px] text-pink-400 font-extrabold uppercase tracking-widest mt-0.5">Mode Mandiri (Solo Play)</p>
             </div>
         </div>
     </nav>
 
-    <!-- Main Game Area -->
-    <main class="max-w-xl mx-auto px-6 py-12">
-        <div class="text-center space-y-8">
+    <!-- Main Registration Box -->
+    <main class="max-w-md w-full mx-auto px-6 py-12 flex-1 flex flex-col justify-center">
+        <div class="glass p-8 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden space-y-6">
+            <div class="absolute -right-20 -top-20 w-48 h-48 rounded-full bg-pink-500/15 blur-2xl"></div>
             
-            <!-- Result Podiums Block -->
-            <div class="glass p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl relative overflow-hidden">
-                <div class="absolute -right-20 -top-20 w-48 h-48 rounded-full bg-pink-500/15 blur-2xl"></div>
-                <div class="absolute -left-20 -bottom-20 w-48 h-48 rounded-full bg-purple-500/15 blur-2xl"></div>
+            <div class="text-center space-y-2">
+                <span class="inline-block text-[9px] uppercase font-extrabold bg-pink-500/20 border border-pink-500/30 text-pink-400 px-3 py-1 rounded-full tracking-widest mb-1">
+                    {{ $quiz->questions->count() }} Pertanyaan
+                </span>
+                <h2 class="text-2xl font-black text-white leading-snug tracking-wide">{{ $quiz->title }}</h2>
+                <p class="text-slate-400 text-xs leading-relaxed">{{ $quiz->description ?? 'Mainkan kuis ini secara mandiri kapan saja.' }}</p>
+            </div>
+
+            <div class="h-px bg-white/10"></div>
+
+            <form action="{{ route('quiz.solo.join', $quiz->code) }}" method="POST" class="space-y-4">
+                @csrf
                 
-                <p class="text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">Skor Akhir Anda</p>
-                <h2 class="text-5xl font-black text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-purple-400 mb-6">{{ $finalScore }}</h2>
-                
-                <div class="h-px bg-white/10 my-6"></div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Nama Lengkap Anda</label>
+                    <input type="text" name="name" required placeholder="Contoh: Rian Hidayat"
+                           class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-sm font-semibold text-white transition-all">
+                </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-white/5 border border-white/5 rounded-2xl p-4">
-                        <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest">Akurasi Soal</p>
-                        <p class="text-2xl font-black text-emerald-400 mt-1">
-                            {{ round(($correctCount / $totalQuestions) * 100) }}%
-                        </p>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Kelas / Unit</label>
+                        <input type="text" name="class" required placeholder="Contoh: XI RPL 2"
+                               class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-sm font-semibold text-white transition-all">
                     </div>
-                    <div class="bg-white/5 border border-white/5 rounded-2xl p-4">
-                        <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-widest">Jawaban Benar</p>
-                        <p class="text-2xl font-black text-purple-400 mt-1">
-                            {{ $correctCount }} / {{ $totalQuestions }}
-                        </p>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Nomor Absen</label>
+                        <input type="text" name="absent_no" required placeholder="Contoh: 18"
+                               class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-sm font-semibold text-white transition-all">
                     </div>
                 </div>
-            </div>
 
-            <!-- Action Buttons -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-sm mx-auto">
-                <a href="{{ route('quiz.solo', $quiz->code) }}" class="flex-1 text-center bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-extrabold py-4 rounded-2xl text-xs uppercase tracking-widest transition-all transform active:scale-95 shadow-lg shadow-purple-500/20">
-                    Coba Lagi
-                </a>
-                <a href="{{ route('dashboard') }}" class="flex-1 text-center border border-white/15 hover:bg-white/5 text-slate-300 font-extrabold py-4 rounded-2xl text-xs uppercase tracking-widest transition-all">
-                    Ke Dashboard
-                </a>
-            </div>
-
+                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-extrabold py-4 rounded-xl text-xs uppercase tracking-widest transition-all transform active:scale-95 shadow-lg shadow-purple-500/20 pt-4">
+                    Mulai Kuis Mandiri
+                </button>
+            </form>
         </div>
     </main>
+
+    <!-- Footer -->
+    <footer class="py-6 text-center text-[10px] text-slate-500 font-medium">
+        &copy; 2026 Quizizz Clone. Dibuat untuk Luaran Pembelajaran Mandiri.
+    </footer>
 
     <!-- Floating User Switcher Simulator Panel -->
     <div class="fixed bottom-6 right-6 z-50 glass shadow-2xl rounded-2xl p-4 max-w-sm text-slate-200 border border-white/10" x-data="{ openSim: false }">

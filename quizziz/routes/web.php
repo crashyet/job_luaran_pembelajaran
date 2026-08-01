@@ -21,8 +21,12 @@ Route::get('/quiz/template/csv', [QuizController::class, 'downloadCSVTemplate'])
 Route::post('/quiz/{quiz}/import', [QuizController::class, 'importQuestions'])->name('quiz.import');
 
 // Solo Mode Routes
-Route::get('/quiz/{quiz}/solo', [QuizController::class, 'startSoloPlay'])->name('quiz.solo');
-Route::get('/quiz/{quiz}/solo/question', [QuizController::class, 'soloQuestionView'])->name('quiz.solo.question');
-Route::post('/quiz/{quiz}/solo/answer', [QuizController::class, 'submitSoloAnswer'])->name('quiz.solo.answer');
-Route::post('/quiz/{quiz}/solo/next', [QuizController::class, 'nextSoloQuestion'])->name('quiz.solo.next');
-Route::get('/quiz/{quiz}/solo/result', [QuizController::class, 'soloResultView'])->name('quiz.solo.result');
+Route::get('/quiz/{quiz_code}/solo', [QuizController::class, 'startSoloPlay'])->name('quiz.solo');
+Route::post('/quiz/{quiz_code}/solo/join', [QuizController::class, 'joinSoloPlay'])->name('quiz.solo.join');
+Route::get('/quiz/{quiz_code}/solo/question', [QuizController::class, 'soloQuestionView'])->name('quiz.solo.question');
+Route::post('/quiz/{quiz_code}/solo/answer', [QuizController::class, 'submitSoloAnswer'])->name('quiz.solo.answer');
+Route::post('/quiz/{quiz_code}/solo/next', [QuizController::class, 'nextSoloQuestion'])->name('quiz.solo.next');
+Route::get('/quiz/{quiz_code}/solo/result', [QuizController::class, 'soloResultView'])->name('quiz.solo.result');
+Route::get('/quiz/{quiz_code}/reports', [QuizController::class, 'getSoloReports'])->name('quiz.reports');
+Route::get('/quiz/{quiz_code}/reports/export', [QuizController::class, 'exportSoloReports'])->name('quiz.reports.export');
+

@@ -74,7 +74,7 @@
               if (this.hasAnswered) return;
               clearInterval(this.timerInterval);
               
-              fetch('{{ route('quiz.solo.answer', $quiz->id) }}', {
+              fetch('{{ route('quiz.solo.answer', $quiz->code) }}', {
                   method: 'POST',
                   headers: {
                       'Content-Type': 'application/json',
@@ -197,7 +197,7 @@
                 </div>
 
                 <div class="max-w-xs mx-auto">
-                    <form action="{{ route('quiz.solo.next', $quiz->id) }}" method="POST">
+                    <form action="{{ route('quiz.solo.next', $quiz->code) }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-extrabold py-4 rounded-2xl text-xs uppercase tracking-widest transition-all transform active:scale-95 shadow-lg shadow-purple-500/20">
                             {{ ($currentIndex + 1) === $totalQuestions ? 'Lihat Hasil Akhir' : 'Pertanyaan Berikutnya' }}

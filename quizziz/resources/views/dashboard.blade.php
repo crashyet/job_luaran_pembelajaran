@@ -46,7 +46,15 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="deep-bg text-slate-100 font-sans min-h-screen pb-24" x-data="{ openCreate: false, openAddQuestion: false, activeQuizId: null, activeQuizTitle: '' }">
+<body class="deep-bg text-slate-100 font-sans min-h-screen pb-24" x-data="{ openCreate: false, openAddQuestion: false, activeQuizId: null, activeQuizTitle: '', openReports: false, reportsList: [], reportsQuizTitle: '', reportsQuizCode: '', showToast: false, toastMessage: '', triggerToast(msg) { this.toastMessage = msg; this.showToast = true; setTimeout(() => { this.showToast = false; }, 3000); }, fetchReports(code, title) { this.reportsQuizTitle = title; this.reportsQuizCode = code; this.reportsList = []; this.openReports = true; fetch('/quiz/' + code + '/reports').then(res => res.json()).then(data => { this.reportsList = data.reports; }); } }">
+
+    <!-- Toast Feedback Notification -->
+    <div x-show="showToast" x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="translate-y-12 opacity-0" x-transition:enter-end="translate-y-0 opacity-100" x-transition:leave="transition ease-in duration-250 transform" x-transition:leave-start="translate-y-0 opacity-100" x-transition:leave-end="translate-y-12 opacity-0" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-bold text-xs uppercase tracking-widest px-6 py-3.5 rounded-2xl shadow-xl shadow-teal-900/30 border border-teal-400/20 flex items-center gap-3" x-cloak>
+        <svg class="w-4 h-4 text-emerald-100 animate-bounce" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+        </svg>
+        <span x-text="toastMessage"></span>
+    </div>
     <!-- Navbar -->
     <nav class="sticky top-0 z-40 w-full glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
@@ -159,7 +167,7 @@
                                         </span>
                                     </div>
                                     <h3 class="text-lg font-black text-white leading-snug tracking-wide line-clamp-1">{{ $quiz->title }}</h3>
-                                    <p class="text-slate-400 text-xs mt-2 leading-relaxed line-clamp-2 h-8">{{ $quiz->description ?? 'Tidak ada deskripsi.' }}</p>
+                                    <p class="text-slate-400 text-xs mt-2 leading-relaxed line-clamp-2 min-h-[2.5rem]">{{ $quiz->description ?? 'Tidak ada deskripsi.' }}</p>
                                     <p class="text-[10px] text-slate-500 mt-4">Dibuat oleh: {{ $quiz->creator->name }}</p>
                                 </div>
 
@@ -178,12 +186,27 @@
                                                 Launch Live Game (Host)
                                             </button>
                                         </form>
+
+                                        <!-- Solo Play Report Button -->
+                                        <button @click="fetchReports('{{ $quiz->code }}', '{{ addslashes($quiz->title) }}')" class="w-full text-center py-3 border border-pink-500/30 hover:border-pink-500/60 hover:bg-pink-500/5 text-pink-400 text-[10px] font-extrabold uppercase tracking-widest rounded-xl transition-all">
+                                            <span>Laporan Hasil Solo</span>
+                                        </button>
                                     @endif
 
-                                    <!-- Solo Play Button -->
-                                    <a href="{{ route('quiz.solo', $quiz->id) }}" class="block w-full text-center bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/35 text-white font-extrabold py-3.5 rounded-xl text-[10px] uppercase tracking-widest transition-all transform active:scale-95">
-                                        Main Mandiri (Solo Play)
-                                    </a>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <!-- Solo Play Button -->
+                                        <a href="{{ route('quiz.solo', $quiz->code ?? '') }}" class="text-center bg-purple-600/30 hover:bg-purple-600/50 border border-purple-500/35 text-white font-extrabold py-3.5 rounded-xl text-[9px] uppercase tracking-wider transition-all transform active:scale-95 flex items-center justify-center">
+                                            Main Solo
+                                        </a>
+
+                                        <!-- Copy Link Button -->
+                                        <button @click="navigator.clipboard.writeText('{{ route('quiz.solo', $quiz->code ?? '') }}'); triggerToast('Link Kuis berhasil disalin!')" class="text-center border border-white/10 hover:bg-white/5 text-slate-300 font-extrabold py-3.5 rounded-xl text-[9px] uppercase tracking-wider transition-all transform active:scale-95 flex items-center justify-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5V6.108c0-1.135.845-2.098 1.976-2.192.373-.03.748-.057 1.123-.08M15.75 18H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08M3.75 18h11.25A2.25 2.25 0 0017.25 15.75V9A2.25 2.25 0 0015.75 6.75H3.75A2.25 2.25 0 001.5 9v6.75A2.25 2.25 0 003.75 18z" />
+                                            </svg>
+                                            <span>Salin Link</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         @endforeach
@@ -371,6 +394,129 @@
                         <button type="submit" class="w-1/2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-purple-500/25">Mulai Import</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Solo Play Reports Modal -->
+    <div x-show="openReports" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-transition>
+        <div @click.away="openReports = false" class="bg-[#1e1b4b]/95 border border-white/10 rounded-3xl w-full max-w-4xl p-6 md:p-8 max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            <!-- Close Button -->
+            <button @click="openReports = false" class="absolute top-6 right-6 text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 rounded-full">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Modal Header -->
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-4 sm:pr-12">
+                <div>
+                    <h2 class="text-xl md:text-2xl font-black text-white tracking-wide">LAPORAN HASIL SOLO PLAY</h2>
+                    <p class="text-xs text-pink-400 font-extrabold uppercase tracking-widest mt-1" x-text="reportsQuizTitle"></p>
+                </div>
+                <div x-show="reportsList.length > 0" x-cloak>
+                    <a :href="'/quiz/' + reportsQuizCode + '/reports/export'" class="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold px-4 py-2.5 rounded-xl text-xs uppercase tracking-widest transition-all transform active:scale-95 shadow-md shadow-teal-500/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                        </svg>
+                        <span>Export CSV</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Loader / Empty State / Table -->
+            <div class="space-y-4">
+                <!-- If Loading or Empty -->
+                <div x-show="reportsList.length === 0" class="text-center py-12 text-slate-400 space-y-3" x-cloak>
+                    <svg class="w-12 h-12 mx-auto text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <p class="text-sm font-bold">Belum ada siswa yang mengerjakan kuis ini lewat mode mandiri.</p>
+                    <p class="text-xs text-slate-500">Salin link solo play kuis ini dan bagikan ke siswa Anda untuk mengumpulkan hasil pengerjaan.</p>
+                </div>
+
+                <!-- Table Content -->
+                <div x-show="reportsList.length > 0" class="overflow-x-auto rounded-2xl border border-white/5 bg-slate-900/40" x-cloak>
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-white/5 bg-white/5 text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                <th class="p-4">No</th>
+                                <th class="p-4">Nama Siswa</th>
+                                <th class="p-4">Kelas</th>
+                                <th class="p-4">No. Absen</th>
+                                <th class="p-4 text-center">Benar</th>
+                                <th class="p-4 text-center">Skor</th>
+                                <th class="p-4">Tanggal</th>
+                                <th class="p-4 text-center">Detail Jawaban</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5 text-xs text-slate-300">
+                            <template x-for="(attempt, idx) in reportsList" :key="attempt.id">
+                                <tr class="hover:bg-white/5 transition-colors">
+                                    <td class="p-4 font-bold text-slate-500" x-text="idx + 1"></td>
+                                    <td class="p-4 font-extrabold text-white" x-text="attempt.name"></td>
+                                    <td class="p-4" x-text="attempt.class"></td>
+                                    <td class="p-4 font-mono" x-text="attempt.absent_no"></td>
+                                    <td class="p-4 text-center font-bold text-emerald-400">
+                                        <span x-text="attempt.correct_answers"></span> / <span x-text="attempt.total_questions"></span>
+                                    </td>
+                                    <td class="p-4 text-center font-black text-pink-400" x-text="attempt.score"></td>
+                                    <td class="p-4 text-[10px] text-slate-500" x-text="new Date(attempt.created_at).toLocaleString('id-ID', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})"></td>
+                                    <td class="p-4 text-center">
+                                        <!-- Detail Answers Sub-list trigger -->
+                                        <div x-data="{ showDetails: false }" class="relative inline-block text-left">
+                                            <button @click="showDetails = !showDetails" class="px-3 py-1.5 bg-purple-500/20 border border-purple-500/35 hover:bg-purple-500/35 text-purple-300 rounded-lg text-[9px] uppercase font-bold tracking-wider transition-all">
+                                                Detail
+                                            </button>
+                                            
+                                            <!-- Detailed Answers Modal/Dropdown overlay -->
+                                            <div x-show="showDetails" @click.away="showDetails = false" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" x-cloak>
+                                                <div class="bg-[#241b5c] border border-white/10 rounded-2xl w-full max-w-xl p-6 text-left space-y-4 max-h-[80vh] overflow-y-auto shadow-2xl">
+                                                    <div class="flex items-center justify-between">
+                                                        <div>
+                                                            <h3 class="text-sm font-black text-white" x-text="'Log Jawaban: ' + attempt.name"></h3>
+                                                            <p class="text-[10px] text-slate-400" x-text="attempt.class + ' • Absen ' + attempt.absent_no"></p>
+                                                        </div>
+                                                        <button @click="showDetails = false" class="text-slate-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-1.5 rounded-full">
+                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                    
+                                                    <div class="divide-y divide-white/5 space-y-3">
+                                                        <template x-for="(ans, aIdx) in attempt.answers" :key="aIdx">
+                                                            <div class="pt-3 first:pt-0 space-y-1.5">
+                                                                <div class="flex items-start justify-between gap-3">
+                                                                    <p class="text-xs font-bold text-white leading-relaxed" x-text="(aIdx + 1) + '. ' + ans.question"></p>
+                                                                    <span class="px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-widest flex-shrink-0"
+                                                                          :class="ans.is_correct ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-400 border border-rose-500/30'">
+                                                                        <span x-text="ans.is_correct ? 'Benar' : 'Salah'"></span>
+                                                                    </span>
+                                                                </div>
+                                                                <div class="grid grid-cols-2 gap-2 text-[10px]">
+                                                                    <div class="bg-white/5 p-2 rounded-lg">
+                                                                        <p class="text-slate-500 font-extrabold uppercase tracking-wider">Jawaban Siswa</p>
+                                                                        <p class="font-bold text-white mt-0.5" x-text="ans.options[ans.selected_option] !== undefined ? ans.options[ans.selected_option] : 'Timeout / Tidak Dijawab'"></p>
+                                                                    </div>
+                                                                    <div class="bg-emerald-500/5 p-2 rounded-lg border border-emerald-500/10">
+                                                                        <p class="text-emerald-500/70 font-extrabold uppercase tracking-wider">Kunci Jawaban</p>
+                                                                        <p class="font-bold text-emerald-300 mt-0.5" x-text="ans.options[ans.correct_option]"></p>
+                                                                    </div>
+                                                                </div>
+                                                                <p class="text-[9px] text-slate-500 leading-none" x-text="'Waktu pengerjaan: ' + ans.time_taken + 's • Poin didapatkan: ' + ans.score_earned"></p>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

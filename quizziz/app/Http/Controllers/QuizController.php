@@ -8,6 +8,7 @@ use App\Models\Question;
 use App\Models\GameSession;
 use App\Models\GamePlayer;
 use App\Models\PlayerAnswer;
+use App\Models\SoloAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -43,6 +44,17 @@ class QuizController extends Controller
     {
         $activeUser = $this->getActiveUser();
         $allUsers = User::all();
+
+        // Fill missing codes for existing quizzes
+        $quizzesWithoutCode = Quiz::whereNull('code')->get();
+        foreach ($quizzesWithoutCode as $q) {
+            $code = 'QZ-' . Str::upper(Str::random(8));
+            while (Quiz::where('code', $code)->exists()) {
+                $code = 'QZ-' . Str::upper(Str::random(8));
+            }
+            $q->update(['code' => $code]);
+        }
+
         $quizzes = Quiz::with('questions')->get();
 
         return view('dashboard', compact('activeUser', 'allUsers', 'quizzes'));
@@ -61,11 +73,17 @@ class QuizController extends Controller
             'description' => 'nullable|string',
         ]);
 
+        $code = 'QZ-' . Str::upper(Str::random(8));
+        while (Quiz::where('code', $code)->exists()) {
+            $code = 'QZ-' . Str::upper(Str::random(8));
+        }
+
         Quiz::create([
             'title' => $request->title,
             'description' => $request->description,
             'creator_id' => $activeUser->id,
             'banner_theme' => collect(['purple', 'indigo', 'pink', 'violet'])->random(),
+            'code' => $code,
         ]);
 
         return back()->with('success', 'Kuis berhasil dibuat! Silakan tambahkan pertanyaan.');
@@ -530,18 +548,39 @@ class QuizController extends Controller
     }
 
     // Start Solo Play
-    public function startSoloPlay(Quiz $quiz)
+    public function startSoloPlay($quiz_code)
     {
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
         if ($quiz->questions()->count() === 0) {
-            return back()->with('error', 'Kuis tidak memiliki pertanyaan! Tambahkan pertanyaan terlebih dahulu.');
+            return redirect()->route('dashboard')->with('error', 'Kuis tidak memiliki pertanyaan! Tambahkan pertanyaan terlebih dahulu.');
         }
+
+        $activeUser = $this->getActiveUser();
+        $allUsers = User::all();
+
+        return view('solo-join', compact('quiz', 'activeUser', 'allUsers'));
+    }
+
+    // Join Solo Play (Save user details)
+    public function joinSoloPlay($quiz_code, Request $request)
+    {
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'class' => 'required|string|max:255',
+            'absent_no' => 'required|string|max:255',
+        ]);
 
         $questions = $quiz->questions()->orderBy('id')->get();
         
-        $sessionKey = "solo_game_{$quiz->id}";
+        $sessionKey = "solo_game_{$quiz->code}";
         session([
             $sessionKey => [
                 'quiz_id' => $quiz->id,
+                'name' => $request->name,
+                'class' => $request->class,
+                'absent_no' => $request->absent_no,
                 'question_ids' => $questions->pluck('id')->toArray(),
                 'current_index' => 0,
                 'score' => 0,
@@ -552,27 +591,28 @@ class QuizController extends Controller
             ]
         ]);
 
-        return redirect()->route('quiz.solo.question', $quiz->id);
+        return redirect()->route('quiz.solo.question', $quiz->code);
     }
 
     // Solo Question View
-    public function soloQuestionView(Quiz $quiz)
+    public function soloQuestionView($quiz_code)
     {
         $activeUser = $this->getActiveUser();
         $allUsers = User::all();
         
-        $sessionKey = "solo_game_{$quiz->id}";
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        $sessionKey = "solo_game_{$quiz->code}";
         $soloSession = session($sessionKey);
 
         if (!$soloSession) {
-            return redirect()->route('dashboard')->with('error', 'Sesi permainan mandiri tidak ditemukan!');
+            return redirect()->route('quiz.solo', $quiz->code)->with('error', 'Sesi permainan mandiri tidak ditemukan!');
         }
 
         $currentIndex = $soloSession['current_index'];
         $questionIds = $soloSession['question_ids'];
 
         if ($currentIndex >= count($questionIds)) {
-            return redirect()->route('quiz.solo.result', $quiz->id);
+            return redirect()->route('quiz.solo.result', $quiz->code);
         }
 
         $questionId = $questionIds[$currentIndex];
@@ -609,9 +649,10 @@ class QuizController extends Controller
     }
 
     // Submit Solo Answer
-    public function submitSoloAnswer(Quiz $quiz, Request $request)
+    public function submitSoloAnswer($quiz_code, Request $request)
     {
-        $sessionKey = "solo_game_{$quiz->id}";
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        $sessionKey = "solo_game_{$quiz->code}";
         $soloSession = session($sessionKey);
 
         if (!$soloSession) {
@@ -631,8 +672,8 @@ class QuizController extends Controller
         }
 
         $startedAt = \Carbon\Carbon::parse($soloSession['question_started_at']);
-        $elapsedSeconds = now()->diffInSeconds($startedAt);
-        $timeTaken = min($question->time_limit, $elapsedSeconds);
+        $elapsedSeconds = abs(now()->diffInSeconds($startedAt));
+        $timeTaken = min($question->time_limit, (int) round($elapsedSeconds));
 
         $isCorrect = ($request->selected_option == $question->correct_answer);
         $scoreEarned = 0;
@@ -666,9 +707,10 @@ class QuizController extends Controller
     }
 
     // Move to Next Question
-    public function nextSoloQuestion(Quiz $quiz, Request $request)
+    public function nextSoloQuestion($quiz_code, Request $request)
     {
-        $sessionKey = "solo_game_{$quiz->id}";
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        $sessionKey = "solo_game_{$quiz->code}";
         $soloSession = session($sessionKey);
 
         if (!$soloSession) {
@@ -679,19 +721,20 @@ class QuizController extends Controller
         session([$sessionKey => $soloSession]);
 
         if ($soloSession['current_index'] >= count($soloSession['question_ids'])) {
-            return redirect()->route('quiz.solo.result', $quiz->id);
+            return redirect()->route('quiz.solo.result', $quiz->code);
         }
 
-        return redirect()->route('quiz.solo.question', $quiz->id);
+        return redirect()->route('quiz.solo.question', $quiz->code);
     }
 
     // Solo Play Results View
-    public function soloResultView(Quiz $quiz)
+    public function soloResultView($quiz_code)
     {
         $activeUser = $this->getActiveUser();
         $allUsers = User::all();
 
-        $sessionKey = "solo_game_{$quiz->id}";
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        $sessionKey = "solo_game_{$quiz->code}";
         $soloSession = session($sessionKey);
 
         if (!$soloSession) {
@@ -702,14 +745,118 @@ class QuizController extends Controller
         $finalScore = $soloSession['score'];
         
         $correctCount = 0;
-        foreach ($soloSession['answers'] as $ans) {
+        $formattedAnswers = [];
+
+        foreach ($soloSession['answers'] as $qId => $ans) {
             if ($ans['is_correct']) {
                 $correctCount++;
             }
+            
+            $question = Question::find($qId);
+            $formattedAnswers[] = [
+                'question' => $question ? $question->text : 'Pertanyaan dihapus',
+                'selected_option' => $ans['selected_option'],
+                'correct_option' => $question ? $question->correct_answer : 0,
+                'options' => $question ? $question->options : [],
+                'is_correct' => $ans['is_correct'],
+                'score_earned' => $ans['score_earned'],
+                'time_taken' => $ans['time_taken'],
+            ];
         }
+
+        // Save Attempt to Database
+        SoloAttempt::create([
+            'quiz_id' => $quiz->id,
+            'name' => $soloSession['name'],
+            'class' => $soloSession['class'],
+            'absent_no' => $soloSession['absent_no'],
+            'score' => $finalScore,
+            'correct_answers' => $correctCount,
+            'total_questions' => $totalQuestions,
+            'answers' => $formattedAnswers,
+        ]);
 
         session()->forget($sessionKey);
 
         return view('solo-result', compact('quiz', 'totalQuestions', 'finalScore', 'correctCount', 'activeUser', 'allUsers'));
     }
+
+    // Fetch reports for solo attempts (For teacher)
+    public function getSoloReports($quiz_code)
+    {
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        $activeUser = $this->getActiveUser();
+
+        if ($quiz->creator_id !== $activeUser->id) {
+            return response()->json(['error' => 'Akses ditolak!'], 403);
+        }
+
+        $reports = $quiz->soloAttempts()->orderBy('created_at', 'desc')->get();
+
+        return response()->json([
+            'quiz_title' => $quiz->title,
+            'reports' => $reports
+        ]);
+    }
+
+    // Export reports for solo attempts to CSV (For teacher)
+    public function exportSoloReports($quiz_code)
+    {
+        $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
+        $activeUser = $this->getActiveUser();
+
+        if ($quiz->creator_id !== $activeUser->id) {
+            abort(403, 'Akses ditolak!');
+        }
+
+        $reports = $quiz->soloAttempts()->orderBy('created_at', 'desc')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=utf-8',
+            'Content-Disposition' => 'attachment; filename="laporan_nilai_' . Str::slug($quiz->title, '_') . '.csv"',
+        ];
+
+        $callback = function() use ($reports) {
+            $file = fopen('php://output', 'w');
+            
+            // Add UTF-8 BOM for proper Excel encoding of special characters
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // CSV Header
+            fputcsv($file, [
+                'No',
+                'Nama Siswa',
+                'Kelas',
+                'No. Absen',
+                'Jumlah Benar',
+                'Total Soal',
+                'Persentase (%)',
+                'Skor Akhir',
+                'Tanggal Mengerjakan'
+            ]);
+
+            foreach ($reports as $index => $row) {
+                $percentage = $row->total_questions > 0 
+                    ? round(($row->correct_answers / $row->total_questions) * 100, 2) 
+                    : 0;
+
+                fputcsv($file, [
+                    $index + 1,
+                    $row->name,
+                    $row->class,
+                    $row->absent_no,
+                    $row->correct_answers,
+                    $row->total_questions,
+                    $percentage . '%',
+                    $row->score,
+                    $row->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
 }
+
