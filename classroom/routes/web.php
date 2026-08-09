@@ -11,6 +11,8 @@ Route::get('/register', [AuthController::class, 'showRegister'])->name('register
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
 Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+Route::get('/select-role', [AuthController::class, 'showSelectRole'])->name('select.role');
+Route::post('/select-role', [AuthController::class, 'saveRole'])->name('select.role.post');
 
 // Protected Routes
 Route::middleware('auth')->group(function () {

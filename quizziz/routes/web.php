@@ -18,6 +18,9 @@ Route::middleware('guest')->group(function () {
 
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+
+    Route::get('/select-role', [AuthController::class, 'showSelectRole'])->name('select.role');
+    Route::post('/select-role', [AuthController::class, 'saveRole'])->name('select.role.post');
 });
 
 /*

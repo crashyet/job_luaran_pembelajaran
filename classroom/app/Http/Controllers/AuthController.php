@@ -94,27 +94,75 @@ class AuthController extends Controller
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
                 ]);
+
+                Auth::login($user);
+                request()->session()->regenerate();
+
+                return redirect()->route('dashboard')
+                    ->with('success', 'Berhasil masuk dengan akun Google: ' . $user->name);
             } else {
-                // Register new user via Google (default role: student)
-                $user = User::create([
-                    'name' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Pengguna Google',
-                    'email' => $googleUser->getEmail(),
-                    'google_id' => $googleUser->getId(),
-                    'avatar' => $googleUser->getAvatar(),
-                    'role' => 'student',
-                    'password' => null,
+                // Save pending Google user data in session and prompt role selection
+                session([
+                    'google_user' => [
+                        'google_id' => $googleUser->getId(),
+                        'name' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Pengguna Google',
+                        'email' => $googleUser->getEmail(),
+                        'avatar' => $googleUser->getAvatar(),
+                    ]
                 ]);
+
+                return redirect()->route('select.role');
             }
-
-            Auth::login($user);
-            request()->session()->regenerate();
-
-            return redirect()->route('dashboard')
-                ->with('success', 'Berhasil masuk dengan akun Google: ' . $user->name);
         } catch (\Exception $e) {
             return redirect()->route('login')
                 ->withErrors(['email' => 'Gagal melakukan otentikasi Google: ' . $e->getMessage()]);
         }
+    }
+
+    // Show role selection form for new Google users
+    public function showSelectRole()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
+        if (!session()->has('google_user')) {
+            return redirect()->route('login');
+        }
+
+        $googleUser = session('google_user');
+        return view('select-role', compact('googleUser'));
+    }
+
+    // Save selected role and complete Google user registration
+    public function saveRole(Request $request)
+    {
+        if (!session()->has('google_user')) {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'role' => ['required', 'in:teacher,student'],
+        ]);
+
+        $googleData = session('google_user');
+
+        $user = User::create([
+            'name' => $googleData['name'],
+            'email' => $googleData['email'],
+            'google_id' => $googleData['google_id'],
+            'avatar' => $googleData['avatar'],
+            'role' => $request->role,
+            'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(16)),
+        ]);
+
+        session()->forget('google_user');
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Akun Google Anda berhasil didaftarkan sebagai ' . ($user->role === 'teacher' ? 'Pengajar' : 'Siswa') . '! Selamat datang, ' . $user->name . '!');
     }
 
     // Handle logout request
