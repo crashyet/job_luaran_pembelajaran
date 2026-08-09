@@ -38,6 +38,40 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
+    // Show register form
+    public function showRegister()
+    {
+        if (Auth::check()) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('register');
+    }
+
+    // Handle register request
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'role' => ['required', 'in:teacher,student'],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => $request->role,
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('dashboard')
+            ->with('success', 'Akun berhasil dibuat! Selamat datang di Classroom, ' . $user->name . '!');
+    }
+
     // Redirect to Google OAuth
     public function redirectToGoogle()
     {

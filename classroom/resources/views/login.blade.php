@@ -142,6 +142,14 @@
                     <span>Masuk dengan Google</span>
                 </a>
             </div>
+
+            <!-- Register Link -->
+            <div class="mt-6 text-center text-xs text-slate-500 font-medium">
+                Belum memiliki akun? 
+                <a href="{{ route('register') }}" class="font-bold text-indigo-600 hover:text-indigo-800 underline ml-1">
+                    Daftar di sini
+                </a>
+            </div>
         </div>
     </div>
 </body>
