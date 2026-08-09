@@ -118,8 +118,16 @@
             <span class="px-3 py-1.5 bg-slate-900/60 border border-white/10 text-white rounded-lg text-xs font-bold">
                 Skor: <span class="text-pink-400 font-black ml-1" x-text="currentScore">0</span>
             </span>
-            <span class="px-3 py-1.5 bg-purple-500/20 border border-purple-500/35 text-purple-300 rounded-lg text-xs font-bold uppercase tracking-wider">
-                Soal {{ $currentIndex + 1 }} / {{ $totalQuestions }}
+            <span class="px-3 py-1.5 bg-purple-500/20 border border-purple-500/35 text-purple-300 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
+                Tingkat {{ $currentLevel }} / {{ $maxLevel }}
+                @if($levelState === 'remedial')
+                    <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-extrabold">
+                        Remedial {{ $consecutiveCorrect + 1 }}/2
+                    </span>
+                @endif
+            </span>
+            <span class="px-3 py-1.5 bg-pink-500/20 border border-pink-500/35 text-pink-300 rounded-lg text-xs font-bold uppercase tracking-wider">
+                Soal Ke-{{ $currentIndex + 1 }}
             </span>
         </div>
     </nav>
@@ -200,7 +208,7 @@
                     <form action="{{ route('quiz.solo.next', $quiz->code) }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-extrabold py-4 rounded-2xl text-xs uppercase tracking-widest transition-all transform active:scale-95 shadow-lg shadow-purple-500/20">
-                            {{ ($currentIndex + 1) === $totalQuestions ? 'Lihat Hasil Akhir' : 'Pertanyaan Berikutnya' }}
+                            Lanjutkan
                         </button>
                     </form>
                 </div>

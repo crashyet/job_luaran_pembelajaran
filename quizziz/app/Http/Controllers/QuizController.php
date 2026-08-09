@@ -11,15 +11,19 @@ use App\Models\PlayerAnswer;
 use App\Models\SoloAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 
 class QuizController extends Controller
 {
-    // Helper to get active user (simulated)
+    // Helper to get active user
     private function getActiveUser()
     {
+        if (Auth::check()) {
+            return Auth::user();
+        }
+
         $userId = session('simulated_user_id');
         if (!$userId) {
-            // Default to teacher
             $teacher = User::where('role', 'teacher')->first();
             if ($teacher) {
                 session(['simulated_user_id' => $teacher->id]);
@@ -29,14 +33,16 @@ class QuizController extends Controller
         return User::find($userId) ?? User::first();
     }
 
-    // Switch simulated user
+    // Switch simulated user / auth user
     public function simulateUser(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
-        session(['simulated_user_id' => $request->user_id]);
-        return back()->with('success', 'Berhasil berganti pengguna simulator!');
+        $user = User::findOrFail($request->user_id);
+        Auth::login($user);
+        $request->session()->regenerate();
+        return back()->with('success', 'Berhasil beralih akun ke: ' . $user->name . ' (' . ($user->role === 'teacher' ? 'Guru' : 'Siswa') . ')');
     }
 
     // Quizizz Dashboard
@@ -104,10 +110,12 @@ class QuizController extends Controller
             'correct_answer' => 'required|integer|min:0|max:3',
             'time_limit' => 'required|integer|min:5|max:120',
             'points' => 'required|integer|min:50|max:500',
+            'level' => 'required|integer|min:1',
         ]);
 
         Question::create([
             'quiz_id' => $quiz->id,
+            'level' => $request->level,
             'text' => $request->text,
             'options' => $request->options,
             'correct_answer' => $request->correct_answer,
@@ -450,7 +458,8 @@ class QuizController extends Controller
                 'opsi_d', 
                 'jawaban_benar', 
                 'limit_waktu', 
-                'poin'
+                'poin',
+                'tingkat'
             ]);
 
             // Sample rows
@@ -462,7 +471,8 @@ class QuizController extends Controller
                 '45',
                 'A',
                 '30',
-                '100'
+                '100',
+                '1'
             ]);
 
             fputcsv($file, [
@@ -473,7 +483,8 @@ class QuizController extends Controller
                 'Photoshop',
                 'C',
                 '20',
-                '100'
+                '100',
+                '2'
             ]);
 
             fclose($file);
@@ -504,7 +515,7 @@ class QuizController extends Controller
             $header = fgetcsv($handle, 1000, ',');
             
             // Expect columns in order:
-            // 0: text, 1: option A, 2: option B, 3: option C, 4: option D, 5: correct_answer, 6: time_limit, 7: points
+            // 0: text, 1: option A, 2: option B, 3: option C, 4: option D, 5: correct_answer, 6: time_limit, 7: points, 8: level
             while (($row = fgetcsv($handle, 1000, ',')) !== false) {
                 if (count($row) < 6) {
                     continue; // Skip invalid row
@@ -528,10 +539,12 @@ class QuizController extends Controller
 
                 $timeLimit = isset($row[6]) && is_numeric($row[6]) ? (int) $row[6] : 30;
                 $points = isset($row[7]) && is_numeric($row[7]) ? (int) $row[7] : 100;
+                $level = isset($row[8]) && is_numeric($row[8]) ? (int) $row[8] : 1;
 
                 if (!empty($text)) {
                     Question::create([
                         'quiz_id' => $quiz->id,
+                        'level' => $level,
                         'text' => $text,
                         'options' => $options,
                         'correct_answer' => $correctAnswer,
@@ -545,6 +558,60 @@ class QuizController extends Controller
         }
 
         return back()->with('success', "Berhasil mengimpor {$questionsAdded} pertanyaan dari file CSV!");
+    }
+
+    // Export Questions to CSV
+    public function exportQuestions(Quiz $quiz)
+    {
+        $activeUser = $this->getActiveUser();
+        if ($quiz->creator_id !== $activeUser->id) {
+            return back()->with('error', 'Anda tidak memiliki akses ke kuis ini!');
+        }
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="export_soal_' . Str::slug($quiz->title) . '.csv"',
+        ];
+
+        $callback = function() use ($quiz) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV Header
+            fputcsv($file, [
+                'pertanyaan', 
+                'opsi_a', 
+                'opsi_b', 
+                'opsi_c', 
+                'opsi_d', 
+                'jawaban_benar', 
+                'limit_waktu', 
+                'poin',
+                'tingkat'
+            ]);
+
+            $questions = $quiz->questions()->orderBy('level')->orderBy('id')->get();
+
+            foreach ($questions as $question) {
+                $correctMapping = [0 => 'A', 1 => 'B', 2 => 'C', 3 => 'D'];
+                $correctAnswerLetter = $correctMapping[$question->correct_answer] ?? 'A';
+
+                fputcsv($file, [
+                    $question->text,
+                    $question->options[0] ?? '',
+                    $question->options[1] ?? '',
+                    $question->options[2] ?? '',
+                    $question->options[3] ?? '',
+                    $correctAnswerLetter,
+                    $question->time_limit,
+                    $question->points,
+                    $question->level
+                ]);
+            }
+
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     // Start Solo Play
@@ -572,8 +639,6 @@ class QuizController extends Controller
             'absent_no' => 'required|string|max:255',
         ]);
 
-        $questions = $quiz->questions()->orderBy('id')->get();
-        
         $sessionKey = "solo_game_{$quiz->code}";
         session([
             $sessionKey => [
@@ -581,8 +646,9 @@ class QuizController extends Controller
                 'name' => $request->name,
                 'class' => $request->class,
                 'absent_no' => $request->absent_no,
-                'question_ids' => $questions->pluck('id')->toArray(),
-                'current_index' => 0,
+                'current_level' => 1,
+                'level_state' => 'primary',
+                'consecutive_correct' => 0,
                 'score' => 0,
                 'streak' => 0,
                 'answers' => [],
@@ -608,28 +674,52 @@ class QuizController extends Controller
             return redirect()->route('quiz.solo', $quiz->code)->with('error', 'Sesi permainan mandiri tidak ditemukan!');
         }
 
-        $currentIndex = $soloSession['current_index'];
-        $questionIds = $soloSession['question_ids'];
+        $currentLevel = $soloSession['current_level'] ?? 1;
+        $levelState = $soloSession['level_state'] ?? 'primary';
+        $consecutiveCorrect = $soloSession['consecutive_correct'] ?? 0;
+        
+        $maxLevel = $quiz->questions()->max('level') ?? 1;
 
-        if ($currentIndex >= count($questionIds)) {
+        if ($currentLevel > $maxLevel) {
             return redirect()->route('quiz.solo.result', $quiz->code);
         }
 
-        $questionId = $questionIds[$currentIndex];
-        $question = Question::findOrFail($questionId);
+        $question = null;
+        if ($levelState === 'primary') {
+            // Primary question for the current level (first question of this level by ID)
+            $question = $quiz->questions()
+                ->where('level', $currentLevel)
+                ->orderBy('id')
+                ->first();
+        } else {
+            // Remedial question: must be at same level, but not already answered in this attempt
+            $answeredIds = array_keys($soloSession['answers'] ?? []);
+            $question = $quiz->questions()
+                ->where('level', $currentLevel)
+                ->whereNotIn('id', $answeredIds)
+                ->inRandomOrder()
+                ->first();
+        }
+
+        if (!$question) {
+            // If we run out of questions at this level, finish the quiz
+            return redirect()->route('quiz.solo.result', $quiz->code);
+        }
 
         // Update question_started_at so timer calculations work correctly
         $soloSession['question_started_at'] = now()->toIso8601String();
+        $soloSession['current_question_id'] = $question->id;
         session([$sessionKey => $soloSession]);
 
-        $totalQuestions = count($questionIds);
+        $currentIndex = count($soloSession['answers'] ?? []);
+        $totalQuestions = $maxLevel; // Display levels as progress
         $currentScore = $soloSession['score'];
         
-        $hasAnswered = isset($soloSession['answers'][$questionId]);
+        $hasAnswered = isset($soloSession['answers'][$question->id]);
         $lastAnswerCorrect = false;
         $scoreEarned = 0;
         if ($hasAnswered) {
-            $ans = $soloSession['answers'][$questionId];
+            $ans = $soloSession['answers'][$question->id];
             $lastAnswerCorrect = $ans['is_correct'];
             $scoreEarned = $ans['score_earned'];
         }
@@ -644,7 +734,11 @@ class QuizController extends Controller
             'lastAnswerCorrect',
             'scoreEarned',
             'activeUser',
-            'allUsers'
+            'allUsers',
+            'currentLevel',
+            'maxLevel',
+            'levelState',
+            'consecutiveCorrect'
         ));
     }
 
@@ -696,6 +790,39 @@ class QuizController extends Controller
             'time_taken' => $timeTaken,
         ];
 
+        // Adaptive Progression Logic
+        $currentLevel = $soloSession['current_level'] ?? 1;
+        $levelState = $soloSession['level_state'] ?? 'primary';
+        $consecutiveCorrect = $soloSession['consecutive_correct'] ?? 0;
+
+        if ($levelState === 'primary') {
+            if ($isCorrect) {
+                // Correct on primary question -> Advance to next level immediately
+                $soloSession['current_level'] += 1;
+                $soloSession['level_state'] = 'primary';
+                $soloSession['consecutive_correct'] = 0;
+            } else {
+                // Incorrect on primary question -> Go to remedial at same level
+                $soloSession['level_state'] = 'remedial';
+                $soloSession['consecutive_correct'] = 0;
+            }
+        } else {
+            // Remedial state: need 2 consecutive correct answers to advance
+            if ($isCorrect) {
+                $consecutiveCorrect += 1;
+                $soloSession['consecutive_correct'] = $consecutiveCorrect;
+                if ($consecutiveCorrect >= 2) {
+                    // Passed remedial -> Advance to next level
+                    $soloSession['current_level'] += 1;
+                    $soloSession['level_state'] = 'primary';
+                    $soloSession['consecutive_correct'] = 0;
+                }
+            } else {
+                // Wrong again -> Reset remedial streak to 0, remain at same level
+                $soloSession['consecutive_correct'] = 0;
+            }
+        }
+
         session([$sessionKey => $soloSession]);
 
         return response()->json([
@@ -717,10 +844,30 @@ class QuizController extends Controller
             return redirect()->route('dashboard')->with('error', 'Sesi tidak ditemukan!');
         }
 
-        $soloSession['current_index'] += 1;
-        session([$sessionKey => $soloSession]);
+        $currentLevel = $soloSession['current_level'] ?? 1;
+        $maxLevel = $quiz->questions()->max('level') ?? 1;
 
-        if ($soloSession['current_index'] >= count($soloSession['question_ids'])) {
+        if ($currentLevel > $maxLevel) {
+            return redirect()->route('quiz.solo.result', $quiz->code);
+        }
+
+        // Verify if a next question is available to be served
+        $levelState = $soloSession['level_state'] ?? 'primary';
+        $question = null;
+        if ($levelState === 'primary') {
+            $question = $quiz->questions()
+                ->where('level', $currentLevel)
+                ->orderBy('id')
+                ->first();
+        } else {
+            $answeredIds = array_keys($soloSession['answers'] ?? []);
+            $question = $quiz->questions()
+                ->where('level', $currentLevel)
+                ->whereNotIn('id', $answeredIds)
+                ->first();
+        }
+
+        if (!$question) {
             return redirect()->route('quiz.solo.result', $quiz->code);
         }
 
@@ -741,7 +888,7 @@ class QuizController extends Controller
             return redirect()->route('dashboard')->with('error', 'Sesi tidak ditemukan!');
         }
 
-        $totalQuestions = count($soloSession['question_ids']);
+        $totalQuestions = count($soloSession['answers'] ?? []);
         $finalScore = $soloSession['score'];
         
         $correctCount = 0;

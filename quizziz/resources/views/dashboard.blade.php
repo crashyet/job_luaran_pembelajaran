@@ -90,6 +90,17 @@
                     <span>Buat Kuis</span>
                 </button>
             @endif
+
+            <!-- Logout Button -->
+            <form action="{{ route('logout') }}" method="POST" class="inline">
+                @csrf
+                <button type="submit" class="flex items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-4 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-widest transition-all transform active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                    </svg>
+                    <span class="hidden sm:inline">Keluar</span>
+                </button>
+            </form>
         </div>
     </nav>
 
@@ -302,6 +313,7 @@
             <div class="flex border-b border-white/5 mb-6">
                 <button @click="tab = 'manual'" :class="tab === 'manual' ? 'border-pink-500 text-pink-400' : 'border-transparent text-slate-400 hover:text-slate-200'" class="flex-1 py-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all">Tambah Manual</button>
                 <button @click="tab = 'import'" :class="tab === 'import' ? 'border-pink-500 text-pink-400' : 'border-transparent text-slate-400 hover:text-slate-200'" class="flex-1 py-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all">Import dari CSV</button>
+                <button @click="tab = 'export'" :class="tab === 'export' ? 'border-pink-500 text-pink-400' : 'border-transparent text-slate-400 hover:text-slate-200'" class="flex-1 py-3 text-xs font-black uppercase tracking-wider border-b-2 transition-all">Export Soal</button>
             </div>
 
             <!-- Tab 1: Manual Form -->
@@ -333,7 +345,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Jawaban Benar</label>
                             <select name="correct_answer" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
@@ -350,6 +362,10 @@
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Poin Maksimal</label>
                             <input type="number" name="points" value="100" min="50" max="500" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-2">Tingkat / Soal Ke-</label>
+                            <input type="number" name="level" value="1" min="1" max="100" class="w-full bg-slate-900/60 px-4 py-3 rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 text-xs text-white">
                         </div>
                     </div>
                     <div class="flex gap-3 pt-4 border-t border-white/5">
@@ -394,6 +410,26 @@
                         <button type="submit" class="w-1/2 px-4 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-bold text-sm transition-all shadow-md shadow-purple-500/25">Mulai Import</button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Tab 3: Export Questions -->
+            <div x-show="tab === 'export'" class="space-y-4">
+                <div class="bg-purple-950/40 border border-purple-500/20 p-6 rounded-2xl text-center space-y-4">
+                    <div class="w-12 h-12 bg-pink-500/10 text-pink-400 rounded-full flex items-center justify-center mx-auto border border-pink-500/25 shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="text-sm font-bold text-white">Export Semua Pertanyaan ke CSV</h4>
+                        <p class="text-xs text-slate-400 max-w-md mx-auto leading-relaxed">Ekspor seluruh daftar soal dari kuis ini ke dalam file CSV. Anda dapat mengedit file tersebut lalu mengimpornya kembali di kuis lain.</p>
+                    </div>
+                    <div class="pt-2">
+                        <form :action="'/quiz/' + activeQuizId + '/export'" method="GET">
+                            <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white rounded-xl font-extrabold text-[10px] uppercase tracking-widest transition-all transform active:scale-95 shadow-lg shadow-purple-500/25">
+                                Unduh File Soal (.csv)
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
