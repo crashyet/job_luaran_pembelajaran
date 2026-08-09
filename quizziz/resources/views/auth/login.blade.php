@@ -141,35 +141,6 @@
                 </a>
             </div>
 
-            <!-- Quick Demo Accounts Switcher -->
-            @if(isset($users) && $users->count() > 0)
-                <div class="mt-8 pt-6 border-t border-white/10">
-                    <p class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 text-center mb-3">⚡ Quick Demo Login (1-Klik)</p>
-                    <div class="space-y-2">
-                        @foreach($users as $u)
-                            <form action="{{ route('quick.login') }}" method="POST">
-                                @csrf
-                                <input type="hidden" name="user_id" value="{{ $u->id }}">
-                                <button type="submit" class="w-full text-left p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-pink-500/30 transition-all flex items-center justify-between group">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-500 to-pink-500 text-white flex items-center justify-center font-bold text-xs uppercase">
-                                            {{ substr($u->name, 0, 2) }}
-                                        </div>
-                                        <div>
-                                            <p class="text-xs font-bold text-white group-hover:text-pink-300 transition-colors">{{ $u->name }}</p>
-                                            <p class="text-[10px] text-slate-400">{{ $u->email }}</p>
-                                        </div>
-                                    </div>
-                                    <span class="text-[9px] uppercase font-extrabold tracking-widest px-2.5 py-1 rounded-lg {{ $u->role === 'teacher' ? 'bg-pink-500/20 text-pink-300 border border-pink-500/30' : 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30' }}">
-                                        {{ $u->role === 'teacher' ? 'Guru/Host' : 'Siswa' }}
-                                    </span>
-                                </button>
-                            </form>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
             <!-- Register Link -->
             <div class="mt-6 text-center text-xs text-slate-400">
                 Belum memiliki akun? 

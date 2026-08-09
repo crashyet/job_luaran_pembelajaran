@@ -18,21 +18,10 @@ class ClassroomController extends Controller
         return auth()->user();
     }
 
-    // Switch simulated user (login switcher)
-    public function simulateUser(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-        auth()->loginUsingId($request->user_id);
-        return back()->with('success', 'Berhasil berganti pengguna simulator!');
-    }
-
     // Classroom Dashboard
     public function index()
     {
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
 
         if ($activeUser->role === 'teacher') {
             $classes = Classroom::where('teacher_id', $activeUser->id)->get();
@@ -40,7 +29,7 @@ class ClassroomController extends Controller
             $classes = $activeUser->classroomsAsStudent;
         }
 
-        return view('dashboard', compact('activeUser', 'allUsers', 'classes'));
+        return view('dashboard', compact('activeUser', 'classes'));
     }
 
     // Create Class
@@ -105,7 +94,6 @@ class ClassroomController extends Controller
     public function show(Classroom $classroom, Request $request)
     {
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
 
         // Check permission: must be class teacher or joined student
         $isTeacher = $classroom->teacher_id === $activeUser->id;
@@ -144,7 +132,6 @@ class ClassroomController extends Controller
         return view('classroom-detail', compact(
             'classroom',
             'activeUser',
-            'allUsers',
             'tab',
             'posts',
             'assignments',

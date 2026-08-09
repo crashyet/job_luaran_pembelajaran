@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/quick-login', [AuthController::class, 'quickLogin'])->name('quick.login');
 
     Route::get('/auth/google', [AuthController::class, 'redirectToGoogle'])->name('auth.google');
     Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallback'])->name('auth.google.callback');
@@ -30,7 +29,6 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/', [QuizController::class, 'index'])->name('dashboard');
-    Route::post('/simulate-user', [QuizController::class, 'simulateUser'])->name('simulate.user');
     Route::post('/quiz/create', [QuizController::class, 'createQuiz'])->name('quiz.create');
     Route::post('/quiz/{quiz}/question', [QuizController::class, 'addQuestion'])->name('quiz.question');
     Route::post('/quiz/{quiz}/host', [QuizController::class, 'hostGame'])->name('quiz.host');

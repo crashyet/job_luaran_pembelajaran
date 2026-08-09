@@ -17,8 +17,7 @@ class AuthController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard');
         }
-        $users = User::all();
-        return view('auth.login', compact('users'));
+        return view('auth.login');
     }
 
     /**
@@ -42,23 +41,6 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
-    }
-
-    /**
-     * Quick login for demo / testing.
-     */
-    public function quickLogin(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-
-        $user = User::findOrFail($request->user_id);
-        Auth::login($user);
-        $request->session()->regenerate();
-
-        return redirect()->route('dashboard')
-            ->with('success', 'Berhasil masuk sebagai ' . $user->name . ' (' . ($user->role === 'teacher' ? 'Guru' : 'Siswa') . ')');
     }
 
     /**

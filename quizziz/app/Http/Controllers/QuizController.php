@@ -18,38 +18,13 @@ class QuizController extends Controller
     // Helper to get active user
     private function getActiveUser()
     {
-        if (Auth::check()) {
-            return Auth::user();
-        }
-
-        $userId = session('simulated_user_id');
-        if (!$userId) {
-            $teacher = User::where('role', 'teacher')->first();
-            if ($teacher) {
-                session(['simulated_user_id' => $teacher->id]);
-                return $teacher;
-            }
-        }
-        return User::find($userId) ?? User::first();
-    }
-
-    // Switch simulated user / auth user
-    public function simulateUser(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-        ]);
-        $user = User::findOrFail($request->user_id);
-        Auth::login($user);
-        $request->session()->regenerate();
-        return back()->with('success', 'Berhasil beralih akun ke: ' . $user->name . ' (' . ($user->role === 'teacher' ? 'Guru' : 'Siswa') . ')');
+        return Auth::user();
     }
 
     // Quizizz Dashboard
     public function index()
     {
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
 
         // Fill missing codes for existing quizzes
         $quizzesWithoutCode = Quiz::whereNull('code')->get();
@@ -63,7 +38,7 @@ class QuizController extends Controller
 
         $quizzes = Quiz::with('questions')->get();
 
-        return view('dashboard', compact('activeUser', 'allUsers', 'quizzes'));
+        return view('dashboard', compact('activeUser', 'quizzes'));
     }
 
     // Create Quiz
@@ -189,7 +164,6 @@ class QuizController extends Controller
     public function sessionView($code)
     {
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
         $session = GameSession::where('code', $code)->with(['quiz', 'players.user', 'currentQuestion'])->firstOrFail();
 
         $isHost = $session->host_id === $activeUser->id;
@@ -231,7 +205,6 @@ class QuizController extends Controller
         return view('game-room', compact(
             'session',
             'activeUser',
-            'allUsers',
             'isHost',
             'myPlayerInfo',
             'answerCount',
@@ -623,9 +596,8 @@ class QuizController extends Controller
         }
 
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
 
-        return view('solo-join', compact('quiz', 'activeUser', 'allUsers'));
+        return view('solo-join', compact('quiz', 'activeUser'));
     }
 
     // Join Solo Play (Save user details)
@@ -664,7 +636,6 @@ class QuizController extends Controller
     public function soloQuestionView($quiz_code)
     {
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
         
         $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
         $sessionKey = "solo_game_{$quiz->code}";
@@ -734,7 +705,6 @@ class QuizController extends Controller
             'lastAnswerCorrect',
             'scoreEarned',
             'activeUser',
-            'allUsers',
             'currentLevel',
             'maxLevel',
             'levelState',
@@ -878,7 +848,6 @@ class QuizController extends Controller
     public function soloResultView($quiz_code)
     {
         $activeUser = $this->getActiveUser();
-        $allUsers = User::all();
 
         $quiz = Quiz::where('code', $quiz_code)->firstOrFail();
         $sessionKey = "solo_game_{$quiz->code}";
@@ -925,7 +894,7 @@ class QuizController extends Controller
 
         session()->forget($sessionKey);
 
-        return view('solo-result', compact('quiz', 'totalQuestions', 'finalScore', 'correctCount', 'activeUser', 'allUsers'));
+        return view('solo-result', compact('quiz', 'totalQuestions', 'finalScore', 'correctCount', 'activeUser'));
     }
 
     // Fetch reports for solo attempts (For teacher)

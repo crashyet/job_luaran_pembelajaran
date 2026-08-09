@@ -15,10 +15,7 @@ class AuthController extends Controller
             return redirect()->route('dashboard');
         }
 
-        // Fetch seeded users for quick login options
-        $seededUsers = User::whereIn('email', ['teacher@example.com', 'rian@example.com', 'siti@example.com'])->get();
-
-        return view('login', compact('seededUsers'));
+        return view('login');
     }
 
     // Handle authentication attempt

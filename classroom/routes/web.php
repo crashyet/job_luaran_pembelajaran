@@ -14,7 +14,6 @@ Route::get('/auth/google/callback', [AuthController::class, 'handleGoogleCallbac
 Route::middleware('auth')->group(function () {
     Route::get('/', [ClassroomController::class, 'index'])->name('dashboard');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    Route::post('/simulate-user', [ClassroomController::class, 'simulateUser'])->name('simulate.user');
     Route::post('/classroom/create', [ClassroomController::class, 'createClass'])->name('classroom.create');
     Route::post('/classroom/join', [ClassroomController::class, 'joinClass'])->name('classroom.join');
     Route::get('/classroom/{classroom}', [ClassroomController::class, 'show'])->name('classroom.show');

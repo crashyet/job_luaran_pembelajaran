@@ -69,30 +69,6 @@
                 </p>
             </div>
 
-            <!-- Seeded Quick Access Accounts -->
-            <div class="relative z-10">
-                <div class="border-t border-white/10 pt-6">
-                    <p class="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-3">Akun Simulasi Cepat (Klik untuk Masuk)</p>
-                    <div class="space-y-2">
-                        @foreach($seededUsers as $user)
-                            <button onclick="quickLogin('{{ $user->email }}')" class="w-full flex items-center justify-between p-2.5 bg-white/10 hover:bg-white/20 border border-white/15 hover:border-white/30 rounded-xl transition-all text-left text-xs font-semibold group">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-7 h-7 rounded-full bg-white/20 text-white flex items-center justify-center font-bold uppercase text-[10px]">
-                                        {{ substr($user->name, 0, 2) }}
-                                    </div>
-                                    <div>
-                                        <p class="font-bold text-white text-xs">{{ $user->name }}</p>
-                                        <p class="text-[10px] text-indigo-200 font-medium leading-none mt-0.5">{{ $user->email }}</p>
-                                    </div>
-                                </div>
-                                <span class="text-[9px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-white/20 group-hover:bg-white/30">
-                                    {{ $user->role === 'teacher' ? 'Pengajar' : 'Siswa' }}
-                                </span>
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
         </div>
 
         <!-- Right Side: Login Form -->
@@ -168,13 +144,5 @@
             </div>
         </div>
     </div>
-
-    <script>
-        function quickLogin(email) {
-            document.getElementById('email').value = email;
-            document.getElementById('password').value = 'password';
-            document.getElementById('login-form').submit();
-        }
-    </script>
 </body>
 </html>
