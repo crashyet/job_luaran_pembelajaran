@@ -12,28 +12,19 @@ use Illuminate\Support\Str;
 
 class ClassroomController extends Controller
 {
-    // Helper to get active user (simulated)
+    // Helper to get active user
     private function getActiveUser()
     {
-        $userId = session('simulated_user_id');
-        if (!$userId) {
-            // Default to teacher
-            $teacher = User::where('role', 'teacher')->first();
-            if ($teacher) {
-                session(['simulated_user_id' => $teacher->id]);
-                return $teacher;
-            }
-        }
-        return User::find($userId) ?? User::first();
+        return auth()->user();
     }
 
-    // Switch simulated user
+    // Switch simulated user (login switcher)
     public function simulateUser(Request $request)
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
         ]);
-        session(['simulated_user_id' => $request->user_id]);
+        auth()->loginUsingId($request->user_id);
         return back()->with('success', 'Berhasil berganti pengguna simulator!');
     }
 
