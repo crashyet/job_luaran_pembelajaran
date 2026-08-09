@@ -113,47 +113,6 @@
         &copy; 2026 Quizizz Clone. Dibuat untuk Luaran Pembelajaran Mandiri.
     </footer>
 
-    <!-- Floating User Switcher Simulator Panel -->
-    <div class="fixed bottom-6 right-6 z-50 glass shadow-2xl rounded-2xl p-4 max-w-sm text-slate-200 border border-white/10" x-data="{ openSim: false }">
-        <div class="flex items-center justify-between gap-4">
-            <div class="flex items-center gap-2">
-                <span class="flex h-3.5 w-3.5 relative">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-3.5 w-3.5 bg-pink-500"></span>
-                </span>
-                <span class="text-xs font-extrabold uppercase tracking-widest text-slate-400">User Simulator</span>
-            </div>
-            <button @click="openSim = !openSim" class="text-xs font-bold bg-pink-600 hover:bg-pink-500 text-white px-3 py-1.5 rounded-lg transition-all shadow-md shadow-pink-500/20">
-                <span x-text="openSim ? 'Sembunyikan' : 'Ganti User'"></span>
-            </button>
-        </div>
 
-        <div x-show="openSim" class="mt-4 pt-4 border-t border-white/10 space-y-3" x-cloak>
-            <p class="text-[11px] text-slate-400 leading-relaxed">Ganti pengguna simulasi di bawah untuk menguji kuis dari sudut pandang siswa atau guru lain.</p>
-            
-            <form action="{{ route('simulate.user') }}" method="POST" class="space-y-2">
-                @csrf
-                <div class="space-y-1.5">
-                    @foreach($allUsers as $user)
-                        <label class="flex items-center justify-between p-2.5 rounded-xl border transition-all cursor-pointer text-sm font-semibold {{ $activeUser->id == $user->id ? 'bg-pink-500/20 border-pink-500 text-pink-300' : 'bg-slate-900/40 border-white/5 text-slate-300 hover:bg-slate-900/60' }}">
-                            <div class="flex items-center gap-2">
-                                <input type="radio" name="user_id" value="{{ $user->id }}" {{ $activeUser->id == $user->id ? 'checked' : '' }} class="hidden" onchange="this.form.submit()">
-                                <div class="w-8 h-8 rounded-full bg-slate-800 text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm">
-                                    {{ substr($user->name, 0, 2) }}
-                                </div>
-                                <div class="text-left">
-                                    <p class="text-xs leading-none font-bold text-white">{{ $user->name }}</p>
-                                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">{{ $user->email }}</p>
-                                </div>
-                            </div>
-                            <span class="text-[9px] uppercase font-extrabold tracking-wider px-2 py-0.5 rounded-md {{ $user->role === 'teacher' ? 'bg-pink-950/80 text-pink-400 border border-pink-800/50' : 'bg-indigo-950/80 text-indigo-400 border border-indigo-800/50' }}">
-                                {{ $user->role === 'teacher' ? 'Teacher' : 'Student' }}
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            </form>
-        </div>
-    </div>
 </body>
 </html>
