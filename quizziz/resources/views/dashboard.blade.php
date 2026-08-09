@@ -168,7 +168,7 @@
                         <p class="text-slate-400 text-xs mt-1 leading-relaxed">Gunakan tombol "Buat Kuis" di pojok kanan atas untuk merancang kuis pertama Anda.</p>
                     </div>
                 @else
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="{ activeQuizId: null }">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @foreach($quizzes as $quiz)
                             <div class="glass hover:border-pink-500/40 rounded-2xl overflow-hidden shadow-lg transition-all duration-300 flex flex-col justify-between border border-white/10 relative group">
                                 <div class="p-6">
