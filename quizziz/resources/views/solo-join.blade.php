@@ -50,16 +50,18 @@
 
     <!-- Navbar -->
     <nav class="w-full glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('dashboard') }}" class="text-slate-400 hover:text-white transition-colors p-2 rounded-xl hover:bg-white/5">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-                </svg>
-            </a>
-            <div class="h-6 w-px bg-white/10 mx-1"></div>
-            <div>
-                <h1 class="text-base font-bold tracking-wider text-white line-clamp-1">Quizizz Interactive</h1>
-                <p class="text-[9px] text-pink-400 font-extrabold uppercase tracking-widest mt-0.5">Mode Mandiri (Solo Play)</p>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('dashboard') }}" class="text-slate-400 hover:text-white transition-colors p-2 rounded-xl hover:bg-white/5">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    </svg>
+                </a>
+                <div class="h-6 w-px bg-white/10 mx-1"></div>
+                <div>
+                    <h1 class="text-base font-bold tracking-wider text-white line-clamp-1">Quizizz Interactive</h1>
+                    <p class="text-[9px] text-pink-400 font-extrabold uppercase tracking-widest mt-0.5">Mode Mandiri (Solo Play)</p>
+                </div>
             </div>
         </div>
     </nav>
@@ -108,11 +110,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="py-6 text-center text-[10px] text-slate-500 font-medium">
-        &copy; 2026 Quizizz Clone. Dibuat untuk Luaran Pembelajaran Mandiri.
-    </footer>
-
-
+    @include('partials.institutional-logos')
 </body>
 </html>

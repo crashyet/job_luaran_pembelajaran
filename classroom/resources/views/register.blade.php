@@ -67,6 +67,17 @@
                 <p class="text-indigo-100 text-sm leading-relaxed mb-6 font-medium">
                     Daftar akun sebagai Pengajar untuk mengelola kelas dan tugas, atau sebagai Siswa untuk mendaftar ke kelas dan mengumpulkan tugas secara praktis.
                 </p>
+
+                <!-- Partner logos badge on card -->
+                <div class="pt-5 border-t border-white/20">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-200 mb-3">Mitra Penyelenggara:</p>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="bg-white/95 p-2 rounded-2xl hover:scale-105 transition-transform shadow-sm"><img src="{{ asset('logo_unma.png') }}" class="h-9 w-auto" title="Universitas Majalengka"></div>
+                        <div class="bg-white/95 p-2 rounded-2xl hover:scale-105 transition-transform shadow-sm"><img src="{{ asset('diktisaintek.webp') }}" class="h-9 w-auto" title="Diktisaintek"></div>
+                        <div class="bg-white/95 p-2 rounded-2xl hover:scale-105 transition-transform shadow-sm"><img src="{{ asset('diktisaintek_berdampak.png') }}" class="h-9 w-auto" title="Diktisaintek Berdampak"></div>
+                        <div class="bg-white/95 p-2 rounded-2xl hover:scale-105 transition-transform shadow-sm"><img src="{{ asset('bima.png') }}" class="h-9 w-auto" title="BIMA Kemdikbudristek"></div>
+                    </div>
+                </div>
             </div>
 
             <div class="relative z-10 text-xs text-indigo-200 font-medium">

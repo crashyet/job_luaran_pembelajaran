@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Classroom Clone - Dashboard</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,20 +48,20 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen pb-24" x-data="{ openCreate: false, openJoin: false }">
     <!-- Navbar -->
-    <nav class="sticky top-0 z-40 w-full glass border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-lg shadow-indigo-100 flex items-center justify-center">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+    <nav class="sticky top-0 z-40 w-full glass border-b border-slate-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <div class="bg-indigo-600 text-white p-2 sm:p-2.5 rounded-xl shadow-lg shadow-indigo-100 flex items-center justify-center">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.231-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84a50.58 50.58 0 00-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M12 21v-3.75m.75-13.06c.084.628.755 1.127 1.459 1.127a1.459 1.459 0 000-2.917c-.704 0-1.375.5-1.459 1.128z" />
                 </svg>
             </div>
             <div>
-                <h1 class="text-xl font-bold tracking-tight text-slate-900">Classroom</h1>
-                <p class="text-xs text-indigo-600 font-medium">Google Classroom Clone</p>
+                <h1 class="text-base sm:text-xl font-bold tracking-tight text-slate-900 leading-tight">Classroom</h1>
+                <p class="text-[10px] sm:text-xs text-indigo-600 font-medium hidden xs:block">Google Classroom Clone</p>
             </div>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1.5 sm:gap-3">
             <!-- Alert Banner -->
             @if(session('success'))
                 <div class="hidden md:flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-sm font-medium border border-emerald-200/50">
@@ -68,30 +76,38 @@
 
             @if($activeUser->role === 'teacher')
                 <!-- Create Class Button -->
-                <button @click="openCreate = true" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 transform active:scale-95 shadow-md shadow-indigo-200">
+                <button @click="openCreate = true" class="flex items-center gap-1.5 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 transform active:scale-95 shadow-md shadow-indigo-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span>Buat Kelas</span>
+                    <span>Buat <span class="hidden sm:inline">Kelas</span></span>
                 </button>
             @else
                 <!-- Join Class Button -->
-                <button @click="openJoin = true" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 transform active:scale-95 shadow-md shadow-indigo-200">
+                <button @click="openJoin = true" class="flex items-center gap-1.5 sm:gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 transform active:scale-95 shadow-md shadow-indigo-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span>Gabung Kelas</span>
+                    <span>Gabung <span class="hidden sm:inline">Kelas</span></span>
                 </button>
             @endif
+
+            <!-- Profile Button -->
+            <a href="{{ route('profile.show') }}" class="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 transform active:scale-95 border border-slate-200/60">
+                <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                <span class="hidden xs:inline">Profil</span>
+            </a>
 
             <!-- Logout Button -->
             <form action="{{ route('logout') }}" method="POST" class="inline">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-xl font-semibold text-sm transition-all duration-300 transform active:scale-95 border border-slate-200/60">
-                    <svg class="w-4.5 h-4.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <button type="submit" class="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all duration-300 transform active:scale-95 border border-slate-200/60" title="Keluar">
+                    <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                     </svg>
-                    <span>Keluar</span>
+                    <span class="hidden sm:inline">Keluar</span>
                 </button>
             </form>
         </div>
@@ -274,5 +290,16 @@
             </form>
         </div>
     </div>
+    @include('partials.institutional-logos')
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Classroom PWA SW Registered'))
+                    .catch(err => console.error('Classroom PWA SW Failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>

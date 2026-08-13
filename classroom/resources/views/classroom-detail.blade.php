@@ -41,17 +41,17 @@
 </head>
 <body class="bg-slate-50 text-slate-900 font-sans min-h-screen pb-24" x-data="{ openCreateAss: false }">
     <!-- Navbar -->
-    <nav class="sticky top-0 z-40 w-full glass border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-indigo-600 transition-colors p-2 rounded-xl hover:bg-indigo-50/50">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+    <nav class="sticky top-0 z-40 w-full glass border-b border-slate-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <a href="{{ route('dashboard') }}" class="text-slate-500 hover:text-indigo-600 transition-colors p-1.5 sm:p-2 rounded-xl hover:bg-indigo-50/50">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
             </a>
-            <div class="h-6 w-px bg-slate-200 mx-1"></div>
+            <div class="h-6 w-px bg-slate-200 mx-0.5 sm:mx-1"></div>
             <div>
-                <h1 class="text-lg font-bold tracking-tight text-slate-900 leading-none">{{ $classroom->name }}</h1>
-                <span class="text-xs font-semibold text-slate-400 mt-1 inline-block">{{ $classroom->section ?? 'Kelas Umum' }}</span>
+                <h1 class="text-sm sm:text-lg font-bold tracking-tight text-slate-900 leading-none truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">{{ $classroom->name }}</h1>
+                <span class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-1 inline-block">{{ $classroom->section ?? 'Kelas Umum' }}</span>
             </div>
         </div>
 
@@ -73,43 +73,43 @@
             @endif
         </div>
 
-        <div class="flex items-center gap-3">
-            <div class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider">
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="bg-indigo-50 border border-indigo-100 text-indigo-700 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                 {{ $activeUser->role === 'teacher' ? 'Pengajar' : 'Siswa' }}
             </div>
             <!-- Logout Button -->
             <form action="{{ route('logout') }}" method="POST" class="inline">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl font-semibold text-xs transition-all duration-300 transform active:scale-95 border border-slate-200/60">
+                <button type="submit" class="flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl font-semibold text-xs transition-all duration-300 transform active:scale-95 border border-slate-200/60" title="Keluar">
                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
                     </svg>
-                    <span>Keluar</span>
+                    <span class="hidden sm:inline">Keluar</span>
                 </button>
             </form>
         </div>
     </nav>
 
     <!-- Mobile Tabs (visible only on small screens) -->
-    <div class="md:hidden flex border-b border-slate-200 bg-white sticky top-[69px] z-30">
-        <a href="?tab=stream" class="w-1/3 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'stream' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
+    <div class="md:hidden flex border-b border-slate-200 bg-white sticky top-[61px] sm:top-[69px] z-30">
+        <a href="?tab=stream" class="flex-1 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'stream' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
             Forum
         </a>
-        <a href="?tab=classwork" class="w-1/3 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'classwork' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
+        <a href="?tab=classwork" class="flex-1 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'classwork' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
             Tugas
         </a>
-        <a href="?tab=people" class="w-1/3 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'people' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
+        <a href="?tab=people" class="flex-1 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'people' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
             Anggota
         </a>
         @if($classroom->teacher_id === $activeUser->id)
-            <a href="?tab=grades" class="w-1/4 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'grades' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
+            <a href="?tab=grades" class="flex-1 py-3 text-center text-xs font-extrabold uppercase tracking-wider border-b-2 {{ $tab === 'grades' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-slate-500' }}">
                 Nilai
             </a>
         @endif
     </div>
 
     <!-- Main Content -->
-    <main class="max-w-5xl mx-auto px-6 py-8">
+    <main class="max-w-5xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
         <!-- Banner Theme Colors mapping -->
         @php
             $themeColors = [
@@ -677,14 +677,18 @@
                     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Instruksi Tugas</label>
                     <textarea name="content" required rows="4" placeholder="Tulis instruksi lengkap tugas dan materi penunjang..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"></textarea>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Poin Maksimal</label>
                         <input type="number" name="points" value="100" min="0" max="100" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tenggat Waktu</label>
-                        <input type="datetime-local" name="due_date" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tanggal Tenggat <span class="text-[10px] text-slate-400 font-normal">(Opsional)</span></label>
+                        <input type="date" name="due_date_only" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Jam Tenggat</label>
+                        <input type="time" name="due_time_only" value="23:59" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
                     </div>
                 </div>
                 <div class="flex gap-3 pt-2">
@@ -694,5 +698,6 @@
             </form>
         </div>
     </div>
+    @include('partials.institutional-logos')
 </body>
 </html>
