@@ -151,7 +151,8 @@ class ClassroomController extends Controller
             'type' => 'required|in:announcement,assignment',
             'title' => 'required_if:type,assignment|nullable|string|max:255',
             'points' => 'required_if:type,assignment|nullable|integer|min:0|max:100',
-            'due_date' => 'required_if:type,assignment|nullable|date',
+            'due_date_only' => 'nullable|date',
+            'due_time_only' => 'nullable|string',
             'attachment' => 'nullable|file|max:10240', // 10MB Limit
         ]);
 
@@ -175,6 +176,15 @@ class ClassroomController extends Controller
             $attachmentPath = 'uploads/' . $filename;
         }
 
+        $dueDate = null;
+        if ($request->filled('due_date_only')) {
+            $time = $request->input('due_time_only', '23:59');
+            if (empty($time)) {
+                $time = '23:59';
+            }
+            $dueDate = $request->due_date_only . ' ' . $time . ':00';
+        }
+
         Post::create([
             'class_id' => $classroom->id,
             'user_id' => $activeUser->id,
@@ -182,7 +192,7 @@ class ClassroomController extends Controller
             'content' => $request->content,
             'type' => $request->type,
             'points' => $request->points,
-            'due_date' => $request->due_date,
+            'due_date' => $dueDate,
             'attachment_path' => $attachmentPath,
             'attachment_name' => $attachmentName,
         ]);

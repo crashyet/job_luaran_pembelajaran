@@ -43,32 +43,42 @@
 
     <div class="w-full max-w-4xl flex flex-col md:flex-row glass rounded-3xl shadow-2xl overflow-hidden border border-slate-200/50">
         <!-- Left Side: Welcome and Brand Info -->
-        <div class="md:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-8 md:p-12 flex flex-col justify-between relative overflow-hidden text-white">
+        <div class="md:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-6 sm:p-8 md:p-12 flex flex-col justify-between relative overflow-hidden text-white">
             <!-- Pattern -->
             <div class="absolute -right-20 -bottom-20 w-80 h-80 rounded-full bg-white/10 blur-2xl"></div>
             <div class="absolute -left-10 -top-10 w-48 h-48 rounded-full bg-white/5 blur-xl"></div>
             
             <div class="relative z-10">
-                <div class="flex items-center gap-3 mb-8">
+                <div class="flex items-center gap-3 mb-6 sm:mb-8">
                     <div class="bg-white/10 p-2.5 rounded-xl border border-white/20 flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.62 48.62 0 0112 20.904a48.62 48.62 0 018.231-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84a50.58 50.58 0 00-2.658.814m-15.482 0A50.717 50.717 0 0112 13.489a50.702 50.702 0 017.74-3.342M12 21v-3.75m.75-13.06c.084.628.755 1.127 1.459 1.127a1.459 1.459 0 000-2.917c-.704 0-1.375.5-1.459 1.128z" />
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl font-bold tracking-tight text-white leading-tight">Classroom</h1>
+                        <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">Classroom</h1>
                         <p class="text-[10px] text-indigo-200 font-semibold tracking-wider uppercase">Google Classroom Clone</p>
                     </div>
                 </div>
 
-                <h2 class="text-2xl md:text-3xl font-extrabold tracking-tight leading-tight mb-4">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight leading-tight mb-3 sm:mb-4">
                     Belajar & Berbagi di Satu Tempat Aman
                 </h2>
-                <p class="text-indigo-100 text-sm leading-relaxed mb-6 font-medium">
+                <p class="text-indigo-100 text-xs sm:text-sm leading-relaxed mb-5 sm:mb-6 font-medium">
                     Masuk untuk mengelola kelas, membagikan pengumuman, mengirim tugas, dan memantau perkembangan nilai Anda secara real-time.
                 </p>
-            </div>
 
+                <!-- Partner logos badge on card -->
+                <div class="pt-4 sm:pt-5 border-t border-white/20">
+                    <p class="text-[10px] font-bold uppercase tracking-wider text-indigo-200 mb-2.5">Mitra Penyelenggara:</p>
+                    <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 sm:gap-2.5">
+                        <div class="bg-white/95 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform shadow-sm flex items-center justify-center"><img src="{{ asset('logo_unma.png') }}" class="h-7 sm:h-9 w-auto object-contain" title="Universitas Majalengka"></div>
+                        <div class="bg-white/95 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform shadow-sm flex items-center justify-center"><img src="{{ asset('diktisaintek.webp') }}" class="h-7 sm:h-9 w-auto object-contain" title="Diktisaintek"></div>
+                        <div class="bg-white/95 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform shadow-sm flex items-center justify-center"><img src="{{ asset('diktisaintek_berdampak.png') }}" class="h-7 sm:h-9 w-auto object-contain" title="Diktisaintek Berdampak"></div>
+                        <div class="bg-white/95 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl hover:scale-105 transition-transform shadow-sm flex items-center justify-center"><img src="{{ asset('bima.png') }}" class="h-7 sm:h-9 w-auto object-contain" title="BIMA Kemdikbudristek"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Side: Login Form -->
@@ -112,7 +122,7 @@
 
                 <div class="flex items-center justify-between pt-1">
                     <label class="flex items-center gap-2 cursor-pointer group">
-                        <input type="checkbox" name="remember" class="w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500/20">
+                        <input type="checkbox" name="remember" checked class="w-4.5 h-4.5 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500/20">
                         <span class="text-xs text-slate-500 group-hover:text-slate-700 transition-colors font-semibold select-none">Ingat saya</span>
                     </label>
                 </div>

@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quizizz Clone - Dashboard</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#ec4899">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -56,20 +64,22 @@
         <span x-text="toastMessage"></span>
     </div>
     <!-- Navbar -->
-    <nav class="sticky top-0 z-40 w-full glass border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-tr from-pink-500 to-purple-600 p-2.5 rounded-2xl shadow-lg shadow-purple-500/20 flex items-center justify-center">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21m0 0l-.813-5.096L3 15.09m6 5.91l4.904-6.096M21 3h-6m6 0v6m0-6L14 9M3 3h6m-6 0v6m0-6l7 7" />
-                </svg>
-            </div>
-            <div>
-                <h1 class="text-xl font-black tracking-wider text-white">QUIZIZZ</h1>
-                <p class="text-[10px] text-pink-400 font-extrabold uppercase tracking-widest">Interactive Clone</p>
+    <nav class="sticky top-0 z-40 w-full glass border-b border-white/10 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2 sm:gap-4">
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="bg-gradient-to-tr from-pink-500 to-purple-600 p-2 sm:p-2.5 rounded-2xl shadow-lg shadow-purple-500/20 flex items-center justify-center">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21m0 0l-.813-5.096L3 15.09m6 5.91l4.904-6.096M21 3h-6m6 0v6m0-6L14 9M3 3h6m-6 0v6m0-6l7 7" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-xl font-black tracking-wider text-white leading-tight">QUIZIZZ</h1>
+                    <p class="text-[9px] sm:text-[10px] text-pink-400 font-extrabold uppercase tracking-widest hidden xs:block">Interactive Clone</p>
+                </div>
             </div>
         </div>
 
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-1.5 sm:gap-3">
             <!-- Alert Banner -->
             @if(session('success'))
                 <div class="hidden md:flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-2 rounded-xl text-sm font-semibold">
@@ -83,20 +93,28 @@
             @endif
 
             @if($activeUser->role === 'teacher')
-                <button @click="openCreate = true" class="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 transform active:scale-95 shadow-lg shadow-purple-500/20">
+                <button @click="openCreate = true" class="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl font-extrabold text-xs sm:text-sm uppercase tracking-widest transition-all duration-300 transform active:scale-95 shadow-lg shadow-purple-500/20">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    <span>Buat Kuis</span>
+                    <span>Buat <span class="hidden sm:inline">Kuis</span></span>
                 </button>
             @endif
+
+            <!-- Profile Button -->
+            <a href="{{ route('profile.show') }}" class="flex items-center gap-1.5 sm:gap-2 bg-white/5 hover:bg-white/10 text-white border border-white/10 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-widest transition-all transform active:scale-95">
+                <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                <span class="hidden xs:inline">Profil</span>
+            </a>
 
             <!-- Logout Button -->
             <form action="{{ route('logout') }}" method="POST" class="inline">
                 @csrf
-                <button type="submit" class="flex items-center gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-4 py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-widest transition-all transform active:scale-95">
+                <button type="submit" class="flex items-center gap-1.5 sm:gap-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl font-extrabold text-xs uppercase tracking-widest transition-all transform active:scale-95" title="Keluar">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3-3m-3-3h12.75" />
                     </svg>
                     <span class="hidden sm:inline">Keluar</span>
                 </button>
@@ -515,5 +533,16 @@
             </div>
         </div>
     </div>
+    @include('partials.institutional-logos')
+    <!-- Service Worker Registration for PWA -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('Quizizz PWA SW Registered'))
+                    .catch(err => console.error('Quizizz PWA SW Failed:', err));
+            });
+        }
+    </script>
 </body>
 </html>

@@ -57,4 +57,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/quiz/{quiz_code}/solo/result', [QuizController::class, 'soloResultView'])->name('quiz.solo.result');
     Route::get('/quiz/{quiz_code}/reports', [QuizController::class, 'getSoloReports'])->name('quiz.reports');
     Route::get('/quiz/{quiz_code}/reports/export', [QuizController::class, 'exportSoloReports'])->name('quiz.reports.export');
+
+    // Profile Routes
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
 });

@@ -65,7 +65,7 @@ class AuthController extends Controller
             'role' => $request->role,
         ]);
 
-        Auth::login($user);
+        Auth::login($user, true);
         $request->session()->regenerate();
 
         return redirect()->route('dashboard')
@@ -95,7 +95,7 @@ class AuthController extends Controller
                     'avatar' => $googleUser->getAvatar(),
                 ]);
 
-                Auth::login($user);
+                Auth::login($user, true);
                 request()->session()->regenerate();
 
                 return redirect()->route('dashboard')
@@ -158,7 +158,7 @@ class AuthController extends Controller
 
         session()->forget('google_user');
 
-        Auth::login($user);
+        Auth::login($user, true);
         $request->session()->regenerate();
 
         return redirect()->route('dashboard')

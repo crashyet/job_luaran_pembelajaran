@@ -25,5 +25,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/post/{post}/comment', [ClassroomController::class, 'storeComment'])->name('post.comment');
     Route::post('/assignment/{post}/submit', [ClassroomController::class, 'submitAssignment'])->name('assignment.submit');
     Route::post('/submission/{submission}/grade', [ClassroomController::class, 'gradeSubmission'])->name('submission.grade');
+
+    // Profile Routes
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
