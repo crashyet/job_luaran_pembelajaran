@@ -145,7 +145,11 @@ class ClassroomController extends Controller
     {
         $activeUser = $this->getActiveUser();
         $isTeacher = $classroom->teacher_id === $activeUser->id;
-        
+
+        if (!$isTeacher) {
+            return back()->with('error', 'Hanya pengajar yang dapat membuat postingan atau tugas!');
+        }
+
         $request->validate([
             'content' => 'required|string',
             'type' => 'required|in:announcement,assignment',
@@ -156,22 +160,18 @@ class ClassroomController extends Controller
             'attachment' => 'nullable|file|max:10240', // 10MB Limit
         ]);
 
-        if ($request->type === 'assignment' && !$isTeacher) {
-            return back()->with('error', 'Hanya pengajar yang dapat membuat tugas!');
-        }
-
         $attachmentPath = null;
         $attachmentName = null;
         if ($request->hasFile('attachment')) {
             $file = $request->file('attachment');
             $attachmentName = $file->getClientOriginalName();
             $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
-            
+
             // Ensure uploads directory exists
             if (!file_exists(public_path('uploads'))) {
                 mkdir(public_path('uploads'), 0777, true);
             }
-            
+
             $file->move(public_path('uploads'), $filename);
             $attachmentPath = 'uploads/' . $filename;
         }
@@ -205,7 +205,7 @@ class ClassroomController extends Controller
     public function storeComment(Post $post, Request $request)
     {
         $activeUser = $this->getActiveUser();
-        
+
         $request->validate([
             'content' => 'required|string',
         ]);

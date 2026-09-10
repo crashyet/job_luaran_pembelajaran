@@ -51,7 +51,9 @@
             <div class="h-6 w-px bg-slate-200 mx-0.5 sm:mx-1"></div>
             <div>
                 <h1 class="text-sm sm:text-lg font-bold tracking-tight text-slate-900 leading-none truncate max-w-[150px] xs:max-w-[220px] sm:max-w-none">{{ $classroom->name }}</h1>
-                <span class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-1 inline-block">{{ $classroom->section ?? 'Kelas Umum' }}</span>
+                @if($classroom->room)
+                    <span class="text-[10px] sm:text-xs font-semibold text-slate-400 mt-1 inline-block">Kelas: {{ $classroom->room }}</span>
+                @endif
             </div>
         </div>
 
@@ -130,15 +132,10 @@
             <div class="relative z-10 flex flex-col justify-between min-h-[120px]">
                 <div>
                     <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-tight">{{ $classroom->name }}</h2>
-                    @if($classroom->section)
-                        <p class="text-lg text-white/80 font-medium mt-1.5">{{ $classroom->section }}</p>
-                    @endif
                 </div>
                 <div class="mt-8 flex flex-wrap gap-4 items-center justify-between border-t border-white/20 pt-6">
                     <div class="text-sm font-semibold text-white/95">
-                        <span class="text-white/60 font-medium">Mata Pelajaran:</span> {{ $classroom->subject ?? '-' }}
-                        <span class="mx-3 text-white/30">|</span>
-                        <span class="text-white/60 font-medium">Ruang:</span> {{ $classroom->room ?? '-' }}
+                        <span class="text-white/60 font-medium">Kelas:</span> {{ $classroom->room ?? '-' }}
                     </div>
                     <div class="bg-white/15 border border-white/25 px-4 py-2 rounded-xl flex items-center gap-2.5 text-white">
                         <span class="text-xs font-semibold text-white/70">Kode Kelas:</span>
@@ -194,51 +191,55 @@
                 <!-- Announcement / Feed Section -->
                 <div class="lg:col-span-3 space-y-6">
                     <!-- Announcement Composer -->
-                    <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm" x-data="{ editing: false }">
-                        <div x-show="!editing" @click="editing = true" class="flex items-center gap-3.5 cursor-pointer hover:bg-slate-50 p-2.5 rounded-xl transition-all">
-                            <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-600 text-sm uppercase">
-                                {{ substr($activeUser->name, 0, 2) }}
+                    @if($classroom->teacher_id === $activeUser->id)
+                        <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm" x-data="{ editing: false }">
+                            <div x-show="!editing" @click="editing = true" class="flex items-center gap-3.5 cursor-pointer hover:bg-slate-50 p-2.5 rounded-xl transition-all">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center font-bold text-indigo-600 text-sm uppercase">
+                                    {{ substr($activeUser->name, 0, 2) }}
+                                </div>
+                                <span class="text-slate-500 text-sm font-medium">Bagikan sesuatu dengan kelas Anda...</span>
                             </div>
-                            <span class="text-slate-500 text-sm font-medium">Bagikan sesuatu dengan kelas Anda...</span>
-                        </div>
 
-                        <div x-show="editing" x-cloak>
-                            <form action="{{ route('classroom.post', $classroom->id) }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <input type="hidden" name="type" value="announcement">
-                                
-                                <div class="mb-4">
-                                    <label class="block text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">Umumkan Sesuatu</label>
-                                    <textarea name="content" required rows="3" placeholder="Tulis pengumuman atau instruksi untuk kelas Anda..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"></textarea>
-                                </div>
-
-                                <div class="mb-4" x-data="{ fileName: '' }">
-                                    <label class="block text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">Lampiran File (Opsional)</label>
-                                    <div class="flex items-center gap-3">
-                                        <label class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-4 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-bold shadow-sm">
-                                            <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 0A3 3 0 1011.293 13.7m3.535-4.536l-3.535 3.535m0 0a3 3 0 11-4.243-4.243l3.535-3.536m3.536 3.536L9.75 14.636a5.002 5.002 0 01-7.072 0 5.002 5.002 0 010-7.072l6.239-6.239a7.5 7.5 0 0110.606 10.606l-6.24 6.24" />
-                                            </svg>
-                                            <span>Pilih File</span>
-                                            <input type="file" name="attachment" class="hidden" @change="fileName = $event.target.files[0]?.name || ''">
-                                        </label>
-                                        <span class="text-xs text-slate-500 font-semibold truncate max-w-[200px]" x-text="fileName || 'Belum ada file terpilih'"></span>
+                            <div x-show="editing" x-cloak>
+                                <form action="{{ route('classroom.post', $classroom->id) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="type" value="announcement">
+                                    
+                                    <div class="mb-4">
+                                        <label class="block text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">Umumkan Sesuatu</label>
+                                        <textarea name="content" required rows="3" placeholder="Tulis pengumuman atau instruksi untuk kelas Anda..." class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"></textarea>
                                     </div>
-                                    <p class="text-[10px] text-slate-400 mt-1.5 font-medium">Format: PDF, Word, Excel, Gambar, Zip, dll. Maksimal 10MB.</p>
-                                </div>
 
-                                <div class="flex items-center justify-end gap-2.5">
-                                    <button type="button" @click="editing = false" class="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition-all">Batal</button>
-                                    <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-indigo-100">Posting</button>
-                                </div>
-                            </form>
+                                    <div class="mb-4" x-data="{ fileName: '' }">
+                                        <label class="block text-xs font-extrabold uppercase tracking-widest text-slate-400 mb-2">Lampiran File (Opsional)</label>
+                                        <div class="flex items-center gap-3">
+                                            <label class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 px-4 py-2.5 rounded-xl cursor-pointer transition-all text-xs font-bold shadow-sm">
+                                                <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636l-3.536 3.536m0 0A3 3 0 1011.293 13.7m3.535-4.536l-3.535 3.535m0 0a3 3 0 11-4.243-4.243l3.535-3.536m3.536 3.536L9.75 14.636a5.002 5.002 0 01-7.072 0 5.002 5.002 0 010-7.072l6.239-6.239a7.5 7.5 0 0110.606 10.606l-6.24 6.24" />
+                                                </svg>
+                                                <span>Pilih File</span>
+                                                <input type="file" name="attachment" class="hidden" @change="fileName = $event.target.files[0]?.name || ''">
+                                            </label>
+                                            <span class="text-xs text-slate-500 font-semibold truncate max-w-[200px]" x-text="fileName || 'Belum ada file terpilih'"></span>
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 mt-1.5 font-medium">Format: PDF, Word, Excel, Gambar, Zip, dll. Maksimal 10MB.</p>
+                                    </div>
+
+                                    <div class="flex items-center justify-end gap-2.5">
+                                        <button type="button" @click="editing = false" class="px-4 py-2 border border-slate-200 text-slate-600 text-xs font-bold rounded-lg hover:bg-slate-50 transition-all">Batal</button>
+                                        <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-indigo-100">Posting</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    @endif
 
                     <!-- Post Feed -->
                     @if($posts->isEmpty())
                         <div class="bg-white border border-slate-200 rounded-2xl p-12 text-center shadow-sm">
-                            <p class="text-slate-500 text-sm">Forum kelas masih kosong. Buat pengumuman pertama Anda!</p>
+                            <p class="text-slate-500 text-sm">
+                                {{ $classroom->teacher_id === $activeUser->id ? 'Forum kelas masih kosong. Buat pengumuman pertama Anda!' : 'Forum kelas masih kosong. Belum ada pengumuman dari pengajar.' }}
+                            </p>
                         </div>
                     @else
                         @foreach($posts as $post)
@@ -658,6 +659,7 @@
 
 
     <!-- Modal Create Assignment -->
+    @if($classroom->teacher_id === $activeUser->id)
     <div x-show="openCreateAss" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" x-cloak>
         <div @click.away="openCreateAss = false" class="bg-white rounded-3xl w-full max-w-xl p-6 shadow-2xl border border-slate-100 transform transition-all">
             <div class="flex items-center justify-between mb-5">
@@ -698,6 +700,7 @@
             </form>
         </div>
     </div>
+    @endif
     @include('partials.institutional-logos')
 </body>
 </html>

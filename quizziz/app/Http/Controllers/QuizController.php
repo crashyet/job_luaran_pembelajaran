@@ -485,46 +485,108 @@ class QuizController extends Controller
 
         if (($handle = fopen($filePath, 'r')) !== false) {
             // Read header
-            $header = fgetcsv($handle, 1000, ',');
+            $header = fgetcsv($handle, 2000, ',');
             
-            // Expect columns in order:
-            // 0: text, 1: option A, 2: option B, 3: option C, 4: option D, 5: correct_answer, 6: time_limit, 7: points, 8: level
-            while (($row = fgetcsv($handle, 1000, ',')) !== false) {
-                if (count($row) < 6) {
-                    continue; // Skip invalid row
+            // Check if this is the Master Bank Soal format
+            $isMasterFormat = false;
+            $headerMap = [];
+            if ($header) {
+                foreach ($header as $idx => $colName) {
+                    $headerMap[trim($colName)] = $idx;
                 }
+                if (isset($headerMap['Pertanyaan']) || isset($headerMap['pertanyaan'])) {
+                    $isMasterFormat = true;
+                }
+            }
 
-                $text = trim($row[0]);
-                $options = [
-                    trim($row[1]),
-                    trim($row[2]),
-                    trim($row[3]),
-                    trim($row[4])
-                ];
-                
-                // Map correct_answer
-                $rawCorrect = strtoupper(trim($row[5]));
-                $correctMapping = [
-                    'A' => 0, 'B' => 1, 'C' => 2, 'D' => 3,
-                    '0' => 0, '1' => 1, '2' => 2, '3' => 3
-                ];
-                $correctAnswer = $correctMapping[$rawCorrect] ?? 0;
+            if ($isMasterFormat) {
+                $count = 0;
+                while (($row = fgetcsv($handle, 2000, ',')) !== false) {
+                    if (count($row) < 10) continue;
 
-                $timeLimit = isset($row[6]) && is_numeric($row[6]) ? (int) $row[6] : 30;
-                $points = isset($row[7]) && is_numeric($row[7]) ? (int) $row[7] : 100;
-                $level = isset($row[8]) && is_numeric($row[8]) ? (int) $row[8] : 1;
+                    $no = isset($headerMap['No']) && is_numeric($row[$headerMap['No']]) ? (int) $row[$headerMap['No']] : ($count + 1);
+                    $textKey = $headerMap['Pertanyaan'] ?? ($headerMap['pertanyaan'] ?? 6);
+                    $text = trim($row[$textKey]);
 
-                if (!empty($text)) {
-                    Question::create([
-                        'quiz_id' => $quiz->id,
-                        'level' => $level,
-                        'text' => $text,
-                        'options' => $options,
-                        'correct_answer' => $correctAnswer,
-                        'time_limit' => $timeLimit,
-                        'points' => $points,
-                    ]);
-                    $questionsAdded++;
+                    $options = [
+                        trim($row[$headerMap['Pilihan A'] ?? 7]),
+                        trim($row[$headerMap['Pilihan B'] ?? 8]),
+                        trim($row[$headerMap['Pilihan C'] ?? 9]),
+                        trim($row[$headerMap['Pilihan D'] ?? 10]),
+                    ];
+
+                    $rawIndex = isset($headerMap['Indeks Jawaban']) ? trim($row[$headerMap['Indeks Jawaban']]) : '';
+                    if (is_numeric($rawIndex)) {
+                        $correctAnswer = max(0, min(3, (int) $rawIndex - 1));
+                    } else {
+                        $rawKunci = isset($headerMap['Kunci']) ? strtoupper(trim($row[$headerMap['Kunci']])) : 'A';
+                        $correctMapping = ['A' => 0, 'B' => 1, 'C' => 2, 'D' => 3];
+                        $correctAnswer = $correctMapping[$rawKunci] ?? 0;
+                    }
+
+                    $timeLimit = isset($headerMap['Waktu (detik)']) && is_numeric($row[$headerMap['Waktu (detik)']])
+                        ? (int) $row[$headerMap['Waktu (detik)']]
+                        : 60;
+
+                    // 10 level grouping: 5 soal per level
+                    $level = (int) floor(($no - 1) / 5) + 1;
+                    if ($level < 1) $level = 1;
+                    if ($level > 10) $level = 10;
+
+                    if (!empty($text)) {
+                        Question::create([
+                            'quiz_id' => $quiz->id,
+                            'level' => $level,
+                            'text' => $text,
+                            'options' => $options,
+                            'correct_answer' => $correctAnswer,
+                            'time_limit' => $timeLimit,
+                            'points' => 100,
+                        ]);
+                        $questionsAdded++;
+                    }
+                    $count++;
+                }
+            } else {
+                // Standard 9-column format
+                // 0: text, 1: option A, 2: option B, 3: option C, 4: option D, 5: correct_answer, 6: time_limit, 7: points, 8: level
+                while (($row = fgetcsv($handle, 1000, ',')) !== false) {
+                    if (count($row) < 6) {
+                        continue; // Skip invalid row
+                    }
+
+                    $text = trim($row[0]);
+                    $options = [
+                        trim($row[1]),
+                        trim($row[2]),
+                        trim($row[3]),
+                        trim($row[4])
+                    ];
+                    
+                    // Map correct_answer
+                    $rawCorrect = strtoupper(trim($row[5]));
+                    $correctMapping = [
+                        'A' => 0, 'B' => 1, 'C' => 2, 'D' => 3,
+                        '0' => 0, '1' => 1, '2' => 2, '3' => 3
+                    ];
+                    $correctAnswer = $correctMapping[$rawCorrect] ?? 0;
+
+                    $timeLimit = isset($row[6]) && is_numeric($row[6]) ? (int) $row[6] : 30;
+                    $points = isset($row[7]) && is_numeric($row[7]) ? (int) $row[7] : 100;
+                    $level = isset($row[8]) && is_numeric($row[8]) ? (int) $row[8] : 1;
+
+                    if (!empty($text)) {
+                        Question::create([
+                            'quiz_id' => $quiz->id,
+                            'level' => $level,
+                            'text' => $text,
+                            'options' => $options,
+                            'correct_answer' => $correctAnswer,
+                            'time_limit' => $timeLimit,
+                            'points' => $points,
+                        ]);
+                        $questionsAdded++;
+                    }
                 }
             }
             fclose($handle);
@@ -695,6 +757,20 @@ class QuizController extends Controller
             $scoreEarned = $ans['score_earned'];
         }
 
+        $levelNames = [
+            1 => 'Penyebut Sama Dasar',
+            2 => 'Pecahan Senilai',
+            3 => 'Operasi 1 Utuh & Cerita Dasar',
+            4 => 'Penjumlahan Beda Penyebut',
+            5 => 'Pengurangan Beda Penyebut',
+            6 => 'Operasi Lanjutan & Kontekstual',
+            7 => 'Soal Cerita Multi-Langkah',
+            8 => 'Pecahan Campuran & Kurung',
+            9 => 'Persamaan Pecahan & Sisa',
+            10 => 'Tantangan HOTS & Pengayaan',
+        ];
+        $levelName = $levelNames[$currentLevel] ?? "Tingkat {$currentLevel}";
+
         return view('solo-room', compact(
             'quiz',
             'question',
@@ -708,7 +784,8 @@ class QuizController extends Controller
             'currentLevel',
             'maxLevel',
             'levelState',
-            'consecutiveCorrect'
+            'consecutiveCorrect',
+            'levelName'
         ));
     }
 

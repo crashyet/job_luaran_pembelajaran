@@ -189,9 +189,6 @@
                                 </span>
                             </div>
                             <div class="relative z-10 mt-auto">
-                                @if($class->section)
-                                    <p class="text-sm font-medium text-white/80 line-clamp-1">{{ $class->section }}</p>
-                                @endif
                                 <p class="text-xs text-white/70 line-clamp-1">Pengajar: {{ $class->teacher->name }}</p>
                             </div>
                         </div>
@@ -199,16 +196,10 @@
                         <!-- Card Body -->
                         <div class="p-5 flex flex-col justify-between flex-grow min-h-[140px]">
                             <div class="text-slate-600 text-sm space-y-2">
-                                @if($class->subject)
-                                    <div class="flex items-center gap-2">
-                                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18" /></svg>
-                                        <span class="line-clamp-1">Mata Pelajaran: {{ $class->subject }}</span>
-                                    </div>
-                                @endif
                                 @if($class->room)
                                     <div class="flex items-center gap-2">
                                         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 13.5a3 3 0 100-6 3 3 0 000 6z" /></svg>
-                                        <span class="line-clamp-1">Ruang: {{ $class->room }}</span>
+                                        <span class="line-clamp-1">Kelas: {{ $class->room }}</span>
                                     </div>
                                 @endif
                                 <div class="flex items-center gap-2">
@@ -248,15 +239,7 @@
                     <input type="text" name="name" required placeholder="Contoh: Matematika Kelas X" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Bagian / Seksi</label>
-                    <input type="text" name="section" placeholder="Contoh: Semester Ganjil" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Mata Pelajaran</label>
-                    <input type="text" name="subject" placeholder="Contoh: Aljabar & Geometri" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Ruang</label>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Kelas</label>
                     <input type="text" name="room" placeholder="Contoh: Kelas 302" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
                 </div>
                 <div class="flex gap-3 pt-2">
