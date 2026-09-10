@@ -186,8 +186,5 @@
 
     </div>
 
-    <!-- Institutional Logos Footer at Bottom -->
-    @include('partials.institutional-logos')
-
 </body>
 </html>

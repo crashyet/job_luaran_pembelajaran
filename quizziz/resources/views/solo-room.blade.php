@@ -120,6 +120,9 @@
             </span>
             <span class="px-3 py-1.5 bg-purple-500/20 border border-purple-500/35 text-purple-300 rounded-lg text-xs font-bold uppercase tracking-wider flex items-center gap-1.5">
                 Tingkat {{ $currentLevel }} / {{ $maxLevel }}
+                @if(!empty($levelName))
+                    <span class="text-[10px] text-purple-200 font-semibold normal-case hidden sm:inline">• {{ $levelName }}</span>
+                @endif
                 @if($levelState === 'remedial')
                     <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-extrabold">
                         Remedial {{ $consecutiveCorrect + 1 }}/2
